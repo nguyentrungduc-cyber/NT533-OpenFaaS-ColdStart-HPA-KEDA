@@ -1,0 +1,31 @@
+# CI/CD tùy chọn (theo đề cương mục 3) — tự động build khi push code
+# thay đổi trong thư mục functions/
+#
+# TODO: điền registry thật (Docker Hub username/local registry) và
+# faas-cli deploy command khi cluster đã sẵn sàng public IP/domain
+
+name: Build Functions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "functions/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install faas-cli
+        run: curl -sSL https://cli.openfaas.com | sudo sh
+
+      # TODO: build từng function đã thay đổi
+      - name: Build hello-world (ví dụ)
+        run: |
+          echo "TODO: faas-cli build -f functions/hello-world/hello-world.yml"
+
+      # TODO: push lên registry (cần secrets DOCKER_USERNAME/DOCKER_PASSWORD)
+      # TODO: deploy lên cluster (cần secrets GATEWAY_URL, hoặc self-hosted runner
+      #       có network tới cluster nội bộ nếu cluster không public)

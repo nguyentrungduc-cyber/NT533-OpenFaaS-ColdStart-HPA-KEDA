@@ -1,0 +1,17 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080 # TODO: đổi thành IP Gateway thật sau khi deploy OpenFaaS
+
+functions:
+  hello-world:
+    lang: python3-http # TODO: đổi ngôn ngữ nếu nhóm chọn khác (node18, go...)
+    handler: ./hello-world
+    image: hello-world:latest # TODO: đổi thành registry thật (Docker Hub/local registry) khi build
+    labels:
+      com.openfaas.scale.zero: "true" # bắt buộc để cold-start xảy ra khi rảnh
+      com.openfaas.scale.min: "0"
+      com.openfaas.scale.max: "5"
+    environment:
+      write_timeout: 15s
+      read_timeout: 15s

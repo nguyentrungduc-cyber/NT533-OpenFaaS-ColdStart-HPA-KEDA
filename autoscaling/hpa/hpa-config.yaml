@@ -1,0 +1,23 @@
+# hpa-config.yaml — Cấu hình HPA dựa trên CPU cho function OpenFaaS
+# TODO (Người 3): điền tên function thật + tinh chỉnh ngưỡng sau khi
+# có cluster + function chạy thật (từ Người 1, Người 2)
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hello-world-hpa
+  namespace: openfaas-fn
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hello-world # TODO: khớp đúng tên Deployment OpenFaaS tạo ra
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50 # TODO: tinh chỉnh sau khi có số liệu baseline

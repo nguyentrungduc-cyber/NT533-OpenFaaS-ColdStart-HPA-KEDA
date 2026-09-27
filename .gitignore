@@ -1,0 +1,40 @@
+# ===== Vagrant / VirtualBox =====
+.vagrant/
+*.box
+
+# ===== Kubernetes secrets/config nhạy cảm =====
+*.kubeconfig
+kubeconfig
+**/secrets.yaml
+**/*-secret.yaml
+
+# ===== Terraform (nếu dùng thêm) =====
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# ===== Kết quả load test lớn (JSON raw, dùng Git LFS nếu cần giữ) =====
+load-testing/results/**/*.json
+!load-testing/results/**/*.summary.json
+
+# ===== Node.js (nếu function viết bằng Node) =====
+node_modules/
+npm-debug.log
+
+# ===== Python (nếu function/script viết bằng Python) =====
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Editor =====
+.vscode/
+.idea/
+*.swp
+
+# ===== Logs =====
+*.log

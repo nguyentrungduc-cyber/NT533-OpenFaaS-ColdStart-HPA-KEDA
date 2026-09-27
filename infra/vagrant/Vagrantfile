@@ -1,0 +1,33 @@
+# Vagrantfile — Dựng cụm 4 VM: 1 control-plane + 3 worker
+# Theo đề cương: mỗi node 2GB RAM, Ubuntu Server 22.04 LTS
+#
+# TODO (Người 1): điền cấu hình mạng nội bộ + provision script gọi tới
+# infra/k3s-setup/ tương ứng cho từng loại node.
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/jammy64" # Ubuntu Server 22.04 LTS
+
+  # ---- Control-plane node ----
+  config.vm.define "control-plane" do |node|
+    node.vm.hostname = "control-plane"
+    node.vm.network "private_network", ip: "192.168.56.10" # TODO: xác nhận dải IP phù hợp máy host
+    node.vm.provider "virtualbox" do |vb|
+      vb.memory = 2048
+      vb.cpus = 1
+    end
+    # TODO: node.vm.provision "shell", path: "../k3s-setup/install-control-plane.sh"
+  end
+
+  # ---- Worker nodes (x3) ----
+  (1..3).each do |i|
+    config.vm.define "worker-#{i}" do |node|
+      node.vm.hostname = "worker-#{i}"
+      node.vm.network "private_network", ip: "192.168.56.#{10 + i}"
+      node.vm.provider "virtualbox" do |vb|
+        vb.memory = 2048
+        vb.cpus = 1
+      end
+      # TODO: node.vm.provision "shell", path: "../k3s-setup/join-worker.sh"
+    end
+  end
+end

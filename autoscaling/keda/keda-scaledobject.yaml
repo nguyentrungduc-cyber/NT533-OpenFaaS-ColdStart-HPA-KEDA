@@ -1,0 +1,21 @@
+# keda-scaledobject.yaml — Cấu hình KEDA dựa trên RPS/HTTP request cho function OpenFaaS
+# TODO (Người 3): điền cấu hình trigger thật (VD: Prometheus query đếm
+# request/s) sau khi Monitoring stack (Người 4) đã chạy
+
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: hello-world-keda
+  namespace: openfaas-fn
+spec:
+  scaleTargetRef:
+    name: hello-world # TODO: khớp đúng tên Deployment OpenFaaS tạo ra
+  minReplicaCount: 0 # cho phép scale-to-zero, khác HPA (thường min=1)
+  maxReplicaCount: 5
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus.monitoring.svc:9090 # TODO: đổi đúng service Prometheus
+        metricName: http_requests_per_second
+        query: sum(rate(gateway_function_invocation_total{function_name="hello-world"}[1m]))
+        threshold: "10" # TODO: tinh chỉnh sau khi có số liệu baseline

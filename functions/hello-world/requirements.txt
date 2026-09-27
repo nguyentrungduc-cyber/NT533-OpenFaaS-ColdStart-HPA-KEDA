@@ -1,0 +1,2 @@
+# hello-world không cần dependency ngoài — giữ nhẹ nhất có thể
+# để làm baseline đo cold-start latency (image nhỏ, khởi động nhanh)
