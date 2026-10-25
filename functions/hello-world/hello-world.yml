@@ -1,17 +1,27 @@
 version: 1.0
 provider:
   name: openfaas
-  gateway: http://127.0.0.1:8080 # TODO: đổi thành IP Gateway thật sau khi deploy OpenFaaS
+  # Gateway URL — ưu tiên dùng biến môi trường OPENFAAS_URL (đã set trong ~/.bashrc)
+  # Nếu chạy từ trong cluster: http://gateway.openfaas.svc.cluster.local:8080
+  # Nếu chạy từ máy host:      http://192.168.243.10:31112
+  # Nếu chạy qua Tailscale:    http://100.88.160.40:31112  (IP Tailscale của master)
+  gateway: http://192.168.243.10:31112
 
 functions:
   hello-world:
-    lang: python3-http # TODO: đổi ngôn ngữ nếu nhóm chọn khác (node18, go...)
+    lang: python3-http
     handler: ./hello-world
-    image: hello-world:latest # TODO: đổi thành registry thật (Docker Hub/local registry) khi build
+    # Image sẽ được build và push lên registry trước khi deploy.
+    # Dùng một trong hai cách:
+    #   1. Local registry trong cluster: 192.168.243.10:5000/hello-world:latest
+    #   2. Docker Hub (cần docker login): <dockerhub-username>/hello-world:latest
+    image: hello-world:latest
     labels:
-      com.openfaas.scale.zero: "true" # bắt buộc để cold-start xảy ra khi rảnh
+      com.openfaas.scale.zero: "true"   # bắt buộc để scale-to-zero → cold-start xảy ra
       com.openfaas.scale.min: "0"
       com.openfaas.scale.max: "5"
     environment:
       write_timeout: 15s
       read_timeout: 15s
+      # exec_timeout áp dụng cho watchdog (nếu dùng of-watchdog)
+      exec_timeout: 10s

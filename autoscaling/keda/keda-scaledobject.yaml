@@ -1,6 +1,21 @@
-# keda-scaledobject.yaml — Cấu hình KEDA dựa trên RPS/HTTP request cho function OpenFaaS
-# TODO (Người 3): điền cấu hình trigger thật (VD: Prometheus query đếm
-# request/s) sau khi Monitoring stack (Người 4) đã chạy
+# keda-scaledobject.yaml — Cấu hình KEDA scale dựa trên RPS (Prometheus trigger)
+#
+# Điểm khác với HPA:
+#   - minReplicaCount: 0  → hỗ trợ scale-to-zero (HPA không làm được)
+#   - Trigger dựa trên request/s thực tế (RPS) thay vì CPU usage
+#   - Phản ứng nhanh hơn HPA khi tải tăng đột ngột
+#
+# Yêu cầu:
+#   - KEDA đã cài trên cluster (arkade install keda)
+#   - Prometheus đang scrape OpenFaaS gateway metrics
+#   - Prometheus service: prometheus.openfaas.svc.cluster.local:9090
+#
+# Deploy:
+#   kubectl apply -f keda-scaledobject.yaml
+#
+# Kiểm tra:
+#   kubectl get scaledobject -n openfaas-fn
+#   kubectl describe scaledobject hello-world-keda -n openfaas-fn
 
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
@@ -9,13 +24,23 @@ metadata:
   namespace: openfaas-fn
 spec:
   scaleTargetRef:
-    name: hello-world # TODO: khớp đúng tên Deployment OpenFaaS tạo ra
-  minReplicaCount: 0 # cho phép scale-to-zero, khác HPA (thường min=1)
+    name: hello-world           # khớp với tên Deployment OpenFaaS tạo ra
+  minReplicaCount: 0            # scale-to-zero khi không có request
   maxReplicaCount: 5
+  cooldownPeriod: 30            # giây chờ trước khi scale down về 0
+  pollingInterval: 15           # giây giữa các lần KEDA poll Prometheus
   triggers:
     - type: prometheus
       metadata:
-        serverAddress: http://prometheus.monitoring.svc:9090 # TODO: đổi đúng service Prometheus
-        metricName: http_requests_per_second
-        query: sum(rate(gateway_function_invocation_total{function_name="hello-world"}[1m]))
-        threshold: "10" # TODO: tinh chỉnh sau khi có số liệu baseline
+        serverAddress: http://prometheus.openfaas.svc.cluster.local:9090
+        metricName: gateway_function_invocation_total_rate
+        # Đếm số request/s tới function hello-world trong 1 phút gần nhất
+        query: >
+          sum(
+            rate(
+              gateway_function_invocation_total{function_name="hello-world"}[1m]
+            )
+          )
+        # Scale up khi RPS vượt ngưỡng này
+        # Tinh chỉnh sau khi có số liệu baseline từ load test
+        threshold: "10"

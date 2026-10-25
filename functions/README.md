@@ -9,7 +9,7 @@ functions minh họa, cấu hình scale-to-zero.
 
 | Function | Mục đích | Trạng thái |
 |---|---|---|
-| `hello-world` | Function demo tối thiểu, dùng test nhanh gateway/scale-to-zero | ⬜ Chưa làm |
+| `hello-world` | Function demo tối thiểu, dùng test nhanh gateway/scale-to-zero | ✅ Code sẵn sàng |
 | `image-processing` | Xử lý ảnh (resize/filter...) | ⬜ Chưa làm |
 | `email-sender` | Gửi email | ⬜ Chưa làm |
 | `data-processor` | Xử lý dữ liệu | ⬜ Chưa làm |

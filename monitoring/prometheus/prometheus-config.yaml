@@ -1,19 +1,68 @@
-# prometheus-config.yaml — Cấu hình scrape targets
-# TODO (Người 4): điền đúng service name/namespace sau khi OpenFaaS
-# và KEDA đã deploy thật trên cluster
+# prometheus-config.yaml — Cấu hình scrape targets cho Prometheus
+#
+# Prometheus trong môi trường này được cài cùng OpenFaaS (namespace: openfaas)
+# Service DNS: prometheus.openfaas.svc.cluster.local:9090
+#
+# File này dùng làm ConfigMap bổ sung scrape targets ngoài cấu hình mặc định
+# của OpenFaaS Prometheus, hoặc để tái tạo cấu hình khi cần.
+#
+# Apply lên cluster:
+#   kubectl create configmap prometheus-config \
+#     --from-file=prometheus.yml=prometheus-config.yaml \
+#     -n openfaas --dry-run=client -o yaml | kubectl apply -f -
 
 global:
-  scrape_interval: 15s
+  scrape_interval:     15s   # tần suất scrape mặc định
+  evaluation_interval: 15s   # tần suất evaluate rules
 
 scrape_configs:
+
+  # ── Kubernetes nodes (CPU, RAM, disk) ──────────────────────────────────────
   - job_name: "kubernetes-nodes"
     kubernetes_sd_configs:
       - role: node
+    relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
 
+  # ── OpenFaaS Gateway ─────────────────────────────────────────────────────
+  # Metrics quan trọng:
+  #   gateway_function_invocation_total   — số lần gọi mỗi function (dùng cho KEDA trigger)
+  #   gateway_functions_seconds_*         — latency histogram
+  #   gateway_service_count               — số pod đang scale
   - job_name: "openfaas-gateway"
     static_configs:
-      - targets: ["gateway.openfaas.svc:8080"] # TODO: xác nhận đúng service
+      - targets:
+          - "gateway.openfaas.svc.cluster.local:8080"
+    metrics_path: /metrics
 
-  - job_name: "keda-metrics"
+  # ── KEDA Operator metrics ─────────────────────────────────────────────────
+  # Dùng để quan sát KEDA đang scale object nào, trigger nào đang active
+  - job_name: "keda-operator"
     static_configs:
-      - targets: ["keda-operator-metrics-apiserver.keda.svc:9022"] # TODO: xác nhận đúng service
+      - targets:
+          - "keda-operator-metrics-apiserver.keda.svc.cluster.local:9022"
+
+  # ── Kubernetes pods (tự động discover) ───────────────────────────────────
+  # Scrape bất kỳ pod nào có annotation prometheus.io/scrape: "true"
+  - job_name: "kubernetes-pods"
+    kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+            - openfaas
+            - openfaas-fn
+            - keda
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: "true"
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
