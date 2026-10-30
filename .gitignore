@@ -38,3 +38,7 @@ Thumbs.db
 
 # ===== Logs =====
 *.log
+
+# ===== faas-cli (tự sinh khi build/pull template) =====
+functions/template/
+functions/build/

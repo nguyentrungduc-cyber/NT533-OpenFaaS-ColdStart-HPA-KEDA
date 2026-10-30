@@ -1,27 +1,30 @@
 version: 1.0
 provider:
   name: openfaas
-  # Gateway URL — ưu tiên dùng biến môi trường OPENFAAS_URL (đã set trong ~/.bashrc)
-  # Nếu chạy từ trong cluster: http://gateway.openfaas.svc.cluster.local:8080
-  # Nếu chạy từ máy host:      http://192.168.243.10:31112
-  # Nếu chạy qua Tailscale:    http://100.88.160.40:31112  (IP Tailscale của master)
+  # Gateway: trên master dùng 192.168.243.10:31112
+  # Từ laptop thành viên (qua Tailscale): http://100.88.160.40:31112
   gateway: http://192.168.243.10:31112
 
+# Template cần tải khi build (GitHub Actions đọc mục này)
+configuration:
+  templates:
+    - name: python3-http
+
+# LUÔN chạy faas-cli từ thư mục functions/ (handler và template tính theo thư mục hiện tại):
+#   cd functions
+#   faas-cli deploy -f hello-world/hello-world.yml --tag sha
 functions:
   hello-world:
     lang: python3-http
     handler: ./hello-world
-    # Image sẽ được build và push lên registry trước khi deploy.
-    # Dùng một trong hai cách:
-    #   1. Local registry trong cluster: 192.168.243.10:5000/hello-world:latest
-    #   2. Docker Hub (cần docker login): <dockerhub-username>/hello-world:latest
-    image: hello-world:latest
+    # Image do GitHub Actions build và đẩy lên GHCR (master không có Docker)
+    image: ghcr.io/nguyentrungduc-cyber/hello-world:latest
     labels:
-      com.openfaas.scale.zero: "true"   # bắt buộc để scale-to-zero → cold-start xảy ra
-      com.openfaas.scale.min: "0"
-      com.openfaas.scale.max: "5"
+      # Tắt bộ co giãn có sẵn của OpenFaaS CE để chỉ HPA hoặc KEDA điều khiển số pod.
+      # Scale-to-zero làm bằng KEDA (minReplicaCount: 0), không dùng nhãn
+      # com.openfaas.scale.zero vì nhãn đó chỉ có tác dụng ở bản OpenFaaS trả phí.
+      com.openfaas.scale.factor: "0"
     environment:
       write_timeout: 15s
       read_timeout: 15s
-      # exec_timeout áp dụng cho watchdog (nếu dùng of-watchdog)
       exec_timeout: 10s
