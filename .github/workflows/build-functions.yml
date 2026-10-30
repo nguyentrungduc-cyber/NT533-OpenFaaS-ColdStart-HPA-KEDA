@@ -25,13 +25,27 @@ jobs:
       - name: Install faas-cli
         run: curl -sSL https://cli.openfaas.com | sudo sh
 
-      # Mỗi function có file <tên>/<tên>.yml; chạy từ thư mục functions/
+      # Nhận cả hai cách tổ chức:
+      #   functions/stack.yml            (gom nhiều function, theo tài liệu hướng dẫn Người 2)
+      #   functions/<tên>/<tên>.yml      (mỗi function một file)
+      # Luôn chạy từ thư mục functions/ vì handler và template tính theo thư mục hiện tại.
       - name: Build and push every function
         working-directory: functions
         run: |
-          for f in */*.yml; do
-            echo "===== $f"
-            faas-cli template pull stack -f "$f"
+          set -e
+          shopt -s nullglob
+          files=( stack.yml */*.yml )
+          if [ ${#files[@]} -eq 0 ]; then echo "Không có file .yml nào"; exit 0; fi
+          for f in "${files[@]}"; do
+            [ -f "$f" ] || continue
+            echo "::group::$f"
+            # 1) Thử tải template theo configuration.templates (cần name + source)
+            faas-cli template pull stack -f "$f" || echo "template pull stack lỗi, chuyển sang template store"
+            # 2) Lang nào chưa có template thì tải từ template store (chỉ cần tên)
+            for lang in $(grep -E '^\s+lang:' "$f" | awk '{print $2}' | sort -u); do
+              [ -d "template/$lang" ] || faas-cli template store pull "$lang"
+            done
             faas-cli build -f "$f" --tag sha
-            faas-cli push -f "$f" --tag sha
+            faas-cli push  -f "$f" --tag sha
+            echo "::endgroup::"
           done
