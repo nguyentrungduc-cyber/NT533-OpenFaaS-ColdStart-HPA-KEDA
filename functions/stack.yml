@@ -1,0 +1,17 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://192.168.243.10:31112
+
+configuration:
+  templates:
+    - name: python3-http
+      source: https://github.com/openfaas/python-flask-template
+
+functions:
+  hello-py:
+    lang: python3-http
+    handler: ./hello-py
+    image: ghcr.io/nguyentrungduc-cyber/hello-py:latest
+    labels:
+      com.openfaas.scale.factor: "0"
