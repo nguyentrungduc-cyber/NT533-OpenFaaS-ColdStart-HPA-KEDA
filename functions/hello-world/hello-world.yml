@@ -9,6 +9,7 @@ provider:
 configuration:
   templates:
     - name: python3-http
+      source: https://github.com/openfaas/python-flask-template
 
 # LUÔN chạy faas-cli từ thư mục functions/ (handler và template tính theo thư mục hiện tại):
 #   cd functions
