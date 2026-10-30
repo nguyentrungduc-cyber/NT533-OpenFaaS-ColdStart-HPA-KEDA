@@ -13,5 +13,3 @@ functions:
     lang: python3-http
     handler: ./hello-py
     image: ghcr.io/nguyentrungduc-cyber/hello-py:latest
-    labels:
-      com.openfaas.scale.factor: "0"
