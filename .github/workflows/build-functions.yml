@@ -1,0 +1,37 @@
+name: Build functions
+
+on:
+  push:
+    branches: [main]
+    paths: ['functions/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install faas-cli
+        run: curl -sSL https://cli.openfaas.com | sudo sh
+
+      # Mỗi function có file <tên>/<tên>.yml; chạy từ thư mục functions/
+      - name: Build and push every function
+        working-directory: functions
+        run: |
+          for f in */*.yml; do
+            echo "===== $f"
+            faas-cli template pull stack -f "$f"
+            faas-cli build -f "$f" --tag sha
+            faas-cli push -f "$f" --tag sha
+          done
