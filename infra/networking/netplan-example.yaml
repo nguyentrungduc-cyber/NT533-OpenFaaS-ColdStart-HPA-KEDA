@@ -1,0 +1,19 @@
+# netplan-example.yaml — cấu hình mạng đã kiểm chứng cho mỗi VM
+# Đặt vào /etc/netplan/00-installer-config.yaml, đổi địa chỉ ens33 cho từng node:
+#   k3s-master .10 | k3s-worker1 .11 | k3s-worker2 .12 | k3s-worker3 .13
+# Áp dụng:
+#   sudo chmod 600 /etc/netplan/00-installer-config.yaml
+#   sudo netplan apply
+#
+# ens33 (host-only): mạng nội bộ cluster, IP tĩnh, KHÔNG đặt gateway.
+# ens37 (NAT): tự nhận IP và làm đường ra internet → không cần gõ lệnh route sau reboot.
+network:
+  version: 2
+  ethernets:
+    ens33:
+      dhcp4: no
+      addresses: [192.168.243.10/24]
+    ens37:
+      dhcp4: yes
+      nameservers:
+        addresses: [8.8.8.8, 1.1.1.1]

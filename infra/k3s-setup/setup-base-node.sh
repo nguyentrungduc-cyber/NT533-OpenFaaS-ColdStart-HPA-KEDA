@@ -53,6 +53,12 @@ SYSCTL
 sudo sysctl --system > /dev/null
 
 echo ""
+echo "⚠️  Nhắc lại 2 việc script KHÔNG làm thay bạn:"
+echo "   1. Netplan: ens33 IP tĩnh không gateway, ens37 dhcp4: yes"
+echo "      (mẫu: infra/networking/netplan-example.yaml)"
+echo "   2. Nếu VM này là bản clone: tạo lại machine-id rồi reboot"
+echo "      sudo rm -f /etc/machine-id /var/lib/dbus/machine-id && sudo systemd-machine-id-setup"
+echo ""
 echo "✅ setup-base-node.sh hoàn tất trên $(hostname)"
 echo "   → Tiếp theo: chạy install-control-plane.sh (master)"
 echo "               hoặc join-worker.sh (worker)"
