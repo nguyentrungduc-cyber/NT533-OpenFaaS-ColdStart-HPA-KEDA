@@ -6,9 +6,18 @@
 #   - Phản ứng nhanh hơn HPA khi tải tăng đột ngột
 #
 # Yêu cầu:
-#   - KEDA đã cài trên cluster (arkade install keda)
+#   - KEDA đã cài trên cluster (Helm chart kedacore/keda, namespace keda)
 #   - Prometheus đang scrape OpenFaaS gateway metrics
 #   - Prometheus service: prometheus.openfaas.svc.cluster.local:9090
+#
+# KHÔNG dùng cùng lúc với HPA cho cùng một function: KEDA tự tạo HPA riêng,
+# hai bên sẽ tranh nhau điều khiển số pod. Gỡ HPA trước:
+#   kubectl delete -f ../hpa/hpa-config.yaml --ignore-not-found
+#
+# Trước khi apply, kiểm tra giá trị nhãn function_name thật trong Prometheus
+# (thường có đuôi namespace, ví dụ hello-world.openfaas-fn):
+#   kubectl -n openfaas port-forward svc/prometheus 9090:9090 &
+#   curl -s 'http://localhost:9090/api/v1/query?query=gateway_function_invocation_total' | head -c 800
 #
 # Deploy:
 #   kubectl apply -f keda-scaledobject.yaml
@@ -33,14 +42,15 @@ spec:
     - type: prometheus
       metadata:
         serverAddress: http://prometheus.openfaas.svc.cluster.local:9090
-        metricName: gateway_function_invocation_total_rate
         # Đếm số request/s tới function hello-world trong 1 phút gần nhất
         query: >
           sum(
             rate(
-              gateway_function_invocation_total{function_name="hello-world"}[1m]
+              gateway_function_invocation_total{function_name="hello-world.openfaas-fn"}[1m]
             )
           )
         # Scale up khi RPS vượt ngưỡng này
         # Tinh chỉnh sau khi có số liệu baseline từ load test
         threshold: "10"
+        # Có request (giá trị > 0) là bật từ 0 lên 1 pod
+        activationThreshold: "0"

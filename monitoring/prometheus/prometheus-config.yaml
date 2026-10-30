@@ -1,3 +1,12 @@
+# ⚠️  KHÔNG APPLY FILE NÀY LÊN CLUSTER KHI CHƯA KIỂM TRA.
+# Prometheus đang chạy là bản đi kèm OpenFaaS và đã có sẵn cấu hình scrape gateway
+# (đủ cho Grafana và KEDA). Lệnh apply ở dưới tạo ConfigMap tên "prometheus-config"
+# trong namespace openfaas — có thể trùng tên ConfigMap của chính OpenFaaS và ghi đè
+# cấu hình gốc, làm hỏng metrics. Ngoài ra các job kubernetes_sd_configs cần quyền
+# RBAC mà Prometheus của OpenFaaS có thể không có.
+# Kiểm tra trước:  kubectl -n openfaas get configmap
+# File này chỉ để tham khảo / ghi lại các target muốn theo dõi.
+#
 # prometheus-config.yaml — Cấu hình scrape targets cho Prometheus
 #
 # Prometheus trong môi trường này được cài cùng OpenFaaS (namespace: openfaas)

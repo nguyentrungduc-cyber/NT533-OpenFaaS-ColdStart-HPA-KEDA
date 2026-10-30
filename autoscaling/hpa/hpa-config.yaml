@@ -1,6 +1,12 @@
 # hpa-config.yaml — Cấu hình HPA dựa trên CPU cho function OpenFaaS
 # TODO (Người 3): điền tên function thật + tinh chỉnh ngưỡng sau khi
 # có cluster + function chạy thật (từ Người 1, Người 2)
+#
+# KHÔNG dùng cùng lúc với KEDA ScaledObject cho cùng một function. Gỡ KEDA trước:
+#   kubectl delete -f ../keda/keda-scaledobject.yaml --ignore-not-found
+# HPA không cho minReplicas = 0; scale-to-zero dùng KEDA.
+# Function hello-world gần như không tốn CPU nên khó kích HPA; khi so sánh thật
+# nên dùng function tốn CPU (ví dụ image-processing).
 
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
