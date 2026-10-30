@@ -56,13 +56,16 @@ OpenFaaS bản CE (bản đang dùng) **không có** tính năng tự co về 0;
 `com.openfaas.scale.zero` chỉ có tác dụng ở bản trả phí. Nhóm làm scale-to-zero bằng
 **KEDA** (`minReplicaCount: 0`, xem `../autoscaling/keda/`).
 
-Mỗi function đặt nhãn sau trong file `.yml` để tắt bộ co giãn có sẵn của OpenFaaS,
-tránh tranh quyền điều khiển số pod với HPA/KEDA:
+**Không** đặt nhãn `com.openfaas.scale.factor: "0"` cho function. Gateway OpenFaaS CE
+0.27.x coi giá trị 0 là không hợp lệ, mọi lần gọi function đều trả về:
 
-```yaml
-labels:
-  com.openfaas.scale.factor: "0"
 ```
+404 - error finding function <tên>.openfaas-fn: bad scaling factor: 0, is not in range of [0 - 100]
+```
+
+Việc bộ co giãn có sẵn của OpenFaaS CE có tranh quyền với HPA/KEDA hay không sẽ được
+kiểm chứng ở bước thử scale-to-zero (tạo tải khi chưa gắn HPA/KEDA, xem số pod có tự tăng
+không). Nếu có, Người 1 tắt ở cấu hình chung bằng `helm upgrade`, không dùng nhãn trên từng function.
 
 ## Liên kết với Cold-start Optimization
 
