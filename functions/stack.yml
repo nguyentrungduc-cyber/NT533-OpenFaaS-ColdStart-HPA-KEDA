@@ -18,3 +18,8 @@ functions:
     lang: python3-http
     handler: ./fibonacci
     image: ghcr.io/nguyentrungduc-cyber/fibonacci:latest
+
+  text-sentiment:
+    lang: python3-http
+    handler: ./text-sentiment
+    image: ghcr.io/nguyentrungduc-cyber/text-sentiment:latest
