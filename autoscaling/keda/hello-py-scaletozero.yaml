@@ -1,0 +1,22 @@
+# Thí nghiệm Giai đoạn 2: kiểm chứng KEDA với minReplicaCount 0 trên OpenFaaS CE.
+# Đã biết faas-netes tự kéo function về lại 1 pod; file này để ghi nhận xung đột giữa hai bên.
+# KHÔNG apply cùng lúc với HPA trên hello-py (KEDA tự tạo HPA riêng, hai bên sẽ tranh quyền).
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: hello-py
+  namespace: openfaas-fn
+spec:
+  scaleTargetRef:
+    name: hello-py
+  minReplicaCount: 0
+  maxReplicaCount: 5
+  pollingInterval: 5
+  cooldownPeriod: 60
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus.openfaas:9090
+        query: sum(rate(gateway_function_invocation_total{function_name="hello-py.openfaas-fn"}[1m]))
+        threshold: "1"
+        activationThreshold: "0"
