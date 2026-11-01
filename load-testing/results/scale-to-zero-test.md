@@ -227,6 +227,10 @@ Lan 2: 3011 ms
 Lan 3: 2985 ms
 
 ## Kết luận và đề xuất
+Nhận xét: lần 1 chậm hơn hẳn (5.3 s), có thể do pod được xếp lên worker chưa có image và phải tải về;
+lần 2 và 3 ổn định quanh 3.0 s (image đã có sẵn). Theo quy ước nhóm, bỏ lần đầu.
+Thời gian này gồm xếp lịch pod, khởi động container và chờ kiểm tra readiness; chưa gồm thời gian request chờ ở gateway.
+Chỉ 3 lần, để kiểm tra phương pháp; số liệu chính thức cần 10-30 lần trên máy đo chuẩn.
 
 1. OpenFaaS CE không cho function ở 0 pod: faas-netes đưa về 1 trong vài giây, không cần request. Đây là giới hạn của bản CE (scale-to-zero thuộc bản trả phí), nay đã được kiểm chứng bằng thực nghiệm.
 2. Tăng pod không bị chặn, nên so sánh HPA vs KEDA vẫn làm được trong khoảng từ 1 pod trở lên.
