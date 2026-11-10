@@ -23,3 +23,8 @@ functions:
     lang: python3-http
     handler: ./text-sentiment
     image: ghcr.io/nguyentrungduc-cyber/text-sentiment:latest
+
+  notify:
+    lang: python3-http
+    handler: ./notify
+    image: ghcr.io/nguyentrungduc-cyber/notify:latest
