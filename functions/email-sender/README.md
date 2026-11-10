@@ -9,7 +9,7 @@ TODO (Người 2): Copy cấu trúc từ `../hello-world/` làm mẫu:
 
 Trong `email-sender.yml` nhớ:
 - `image: ghcr.io/nguyentrungduc-cyber/email-sender:latest`
-- nhãn `com.openfaas.scale.factor: "0"` (tắt bộ co giãn có sẵn của OpenFaaS)
+- **không** đặt nhãn `com.openfaas.scale.factor: "0"` (gateway CE từ chối giá trị 0, gọi function sẽ lỗi 404, xem `../README.md`)
 - khai báo template trong mục `configuration.templates`, **phải có cả `name` và `source`** (copy từ `../hello-world/hello-world.yml`), thiếu `source` thì GitHub Actions báo lỗi `The repository URL must be a valid git repo uri`
 
 Scale-to-zero làm bằng KEDA (xem `../../autoscaling/keda/`), không dùng nhãn

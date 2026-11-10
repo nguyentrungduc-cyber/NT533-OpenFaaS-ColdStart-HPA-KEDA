@@ -20,11 +20,10 @@ functions:
     handler: ./hello-world
     # Image do GitHub Actions build và đẩy lên GHCR (master không có Docker)
     image: ghcr.io/nguyentrungduc-cyber/hello-world:latest
-    labels:
-      # Tắt bộ co giãn có sẵn của OpenFaaS CE để chỉ HPA hoặc KEDA điều khiển số pod.
-      # Scale-to-zero làm bằng KEDA (minReplicaCount: 0), không dùng nhãn
-      # com.openfaas.scale.zero vì nhãn đó chỉ có tác dụng ở bản OpenFaaS trả phí.
-      com.openfaas.scale.factor: "0"
+    # KHÔNG đặt nhãn com.openfaas.scale.factor: "0": gateway CE 0.27.x từ chối giá trị 0
+    # và mọi lần gọi function đều trả 404 "bad scaling factor: 0".
+    # Scale-to-zero làm bằng KEDA (minReplicaCount: 0), không dùng nhãn
+    # com.openfaas.scale.zero vì nhãn đó chỉ có tác dụng ở bản OpenFaaS trả phí.
     environment:
       write_timeout: 15s
       read_timeout: 15s
