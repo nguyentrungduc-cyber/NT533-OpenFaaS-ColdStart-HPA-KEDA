@@ -28,3 +28,8 @@ functions:
     lang: python3-http
     handler: ./notify
     image: ghcr.io/nguyentrungduc-cyber/notify:latest
+
+  image-resize:
+    lang: python3-http
+    handler: ./image-resize
+    image: ghcr.io/nguyentrungduc-cyber/image-resize:latest
