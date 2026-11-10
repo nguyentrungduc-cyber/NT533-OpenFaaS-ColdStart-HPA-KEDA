@@ -13,3 +13,8 @@ functions:
     lang: python3-http
     handler: ./hello-py
     image: ghcr.io/nguyentrungduc-cyber/hello-py:latest
+
+  fibonacci:
+    lang: python3-http
+    handler: ./fibonacci
+    image: ghcr.io/nguyentrungduc-cyber/fibonacci:latest
