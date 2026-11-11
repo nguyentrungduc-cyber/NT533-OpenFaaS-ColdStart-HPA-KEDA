@@ -1,0 +1,10 @@
+{
+  "name": "data-transform",
+  "version": "1.0.0",
+  "description": "NT533 Nhom 12 - doi ten, loc va tinh tong ban ghi JSON",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"no test\" && exit 0"
+  },
+  "license": "MIT"
+}
