@@ -33,11 +33,15 @@ kubeadm để giảm tải RAM. Thành viên khác truy cập qua Tailscale.
 │   └── networking/               # Cấu hình mạng nội bộ, Ingress
 │
 ├── functions/                   # Người 2 — Serverless Platform & Cold-start
-│   ├── hello-world/               # Function demo tối thiểu để test nhanh
-│   ├── image-processing/          # Xử lý ảnh
-│   ├── email-sender/              # Gửi email
-│   ├── data-processor/            # Xử lý dữ liệu
-│   └── pdf-generator/             # Tạo PDF (function thứ 5)
+│   ├── stack.yml                  # Khai báo chung: hello-py, fibonacci, text-sentiment, notify, image-resize
+│   ├── hello-world/               # Function demo tối thiểu, baseline đo cold-start
+│   ├── hello-py/                  # Function demo (khai báo trong stack.yml)
+│   ├── fibonacci/                 # Tải CPU điều chỉnh được (thử HPA vs KEDA)
+│   ├── text-sentiment/            # Phân tích cảm xúc văn bản, function nhẹ
+│   ├── notify/                    # Mô phỏng gửi thông báo (chỉ ghi log)
+│   ├── image-resize/              # Resize ảnh bằng Pillow, image lớn
+│   └── image-processing/, email-sender/, data-processor/, pdf-generator/
+│                                  # Chỉ có README hướng dẫn, chưa triển khai
 │
 ├── coldstart-optimization/       # Người 2 — Trọng tâm nghiên cứu #1
 │   ├── warm-pool/                  # Chiến lược giữ pod ấm sẵn
@@ -58,10 +62,12 @@ kubeadm để giảm tải RAM. Thành viên khác truy cập qua Tailscale.
 │   ├── prometheus/                  # Cấu hình scrape targets
 │   └── grafana/dashboards/          # Dashboard JSON export
 │
-└── docs/                          # Người 4 — Tổng hợp & Báo cáo
-    ├── weekly-reports/               # Báo cáo tiến độ theo tuần (15 tuần)
-    ├── architecture/                 # Sơ đồ kiến trúc, diagram
-    └── final-report/                 # Báo cáo cuối kỳ + slide bảo vệ
+├── docs/                          # Người 4 — Tổng hợp & Báo cáo
+│   ├── weekly-reports/               # Báo cáo tiến độ theo tuần (15 tuần)
+│   ├── architecture/                 # Đề cương gốc, sơ đồ kiến trúc
+│   └── final-report/                 # Báo cáo cuối kỳ + slide bảo vệ
+│
+└── .github/workflows/             # GitHub Actions build image function lên GHCR
 ```
 
 ## Thành viên & phân công

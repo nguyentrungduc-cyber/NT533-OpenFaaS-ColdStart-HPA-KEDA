@@ -10,11 +10,22 @@ tích hợp metrics từ OpenFaaS & Kubernetes.
 ```
 monitoring/
 ├── prometheus/
-│   └── prometheus-config.yaml   # Cấu hình scrape targets
+│   └── prometheus-config.yaml   # Chỉ để tham khảo, KHÔNG apply (xem bên dưới)
 └── grafana/
-    └── dashboards/
-        └── openfaas-overview.json   # Dashboard export (JSON)
+    └── dashboards/              # Dashboard export (JSON), hiện chưa có file nào
 ```
+
+## Hiện trạng (Người 1 đã cài sẵn)
+
+- Prometheus: đi kèm OpenFaaS, namespace `openfaas`, địa chỉ trong cluster
+  `http://prometheus.openfaas:9090` (dùng làm datasource cho Grafana). Đã có sẵn cấu hình
+  scrape gateway, đủ cho Grafana và KEDA.
+- Grafana: Helm chart `grafana/grafana`, namespace `monitoring`, NodePort `31782`
+  (`http://192.168.243.10:31782`, qua Tailscale: `http://100.88.160.40:31782`).
+
+**Không apply `prometheus/prometheus-config.yaml` lên cluster khi chưa kiểm tra:** lệnh
+trong file tạo ConfigMap có thể trùng tên ConfigMap của OpenFaaS và ghi đè cấu hình gốc
+(xem cảnh báo đầu file).
 
 ## Timeline (theo đề cương)
 
