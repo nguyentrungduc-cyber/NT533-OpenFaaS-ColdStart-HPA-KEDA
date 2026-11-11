@@ -22,8 +22,8 @@ functions:
     image: ghcr.io/nguyentrungduc-cyber/hello-world:latest
     # KHÔNG đặt nhãn com.openfaas.scale.factor: "0": gateway CE 0.27.x từ chối giá trị 0
     # và mọi lần gọi function đều trả 404 "bad scaling factor: 0".
-    # Scale-to-zero làm bằng KEDA (minReplicaCount: 0), không dùng nhãn
-    # com.openfaas.scale.zero vì nhãn đó chỉ có tác dụng ở bản OpenFaaS trả phí.
+    # Bản CE không có scale-to-zero, kể cả khi dùng KEDA với minReplicaCount: 0
+    # (faas-netes giữ mức sàn 1 pod). Xem load-testing/results/scale-to-zero-test.md.
     environment:
       write_timeout: 15s
       read_timeout: 15s

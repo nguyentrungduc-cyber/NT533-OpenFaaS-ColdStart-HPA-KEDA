@@ -5,7 +5,7 @@
 Cấu hình OpenFaaS Gateway (Người 1 đã cài sẵn trên cluster), viết tối thiểu 5
 serverless functions minh họa, cấu hình scale-to-zero.
 
-## Danh sách function (theo đề cương — tối thiểu 5)
+## Danh sách function (đề cương yêu cầu tối thiểu 5, hiện có 6)
 
 | Function | Mục đích | Khai báo ở | Trạng thái |
 |---|---|---|---|
@@ -14,11 +14,12 @@ serverless functions minh họa, cấu hình scale-to-zero.
 | `fibonacci` | Tạo tải CPU điều chỉnh được, dùng thử HPA vs KEDA | `stack.yml` | ✅ Code sẵn sàng |
 | `text-sentiment` | Phân tích cảm xúc văn bản, function nhẹ để đo throughput | `stack.yml` | ✅ Code sẵn sàng |
 | `notify` | Mô phỏng gửi thông báo (chỉ ghi log, không gửi email thật) | `stack.yml` | ✅ Code sẵn sàng |
-| `image-resize` | Resize ảnh bằng Pillow, image lớn, tốn CPU | `stack.yml` | ✅ Code sẵn sàng |
-| `image-processing` | Xử lý ảnh (resize/filter...) | — | ⬜ Chưa làm |
-| `email-sender` | Gửi email | — | ⬜ Chưa làm |
-| `data-processor` | Xử lý dữ liệu | — | ⬜ Chưa làm |
-| `pdf-generator` | Tạo PDF | — | ⬜ Chưa làm |
+| `image-resize` | Resize ảnh bằng Pillow, image lớn, tốn CPU (TN2, TN3) | `stack.yml` | ✅ Code sẵn sàng |
+| `data-transform` | Biến đổi/lọc/cộng bản ghi JSON; Node.js, để đối chiếu cold-start với Python (TN1) | `stack.yml` | ✅ Code sẵn sàng |
+
+Bốn thư mục `image-processing`, `email-sender`, `data-processor`, `pdf-generator` trước
+đây chỉ có README hướng dẫn, chưa từng được triển khai, nay đã xoá. `notify` thay cho
+`email-sender` và `image-resize` thay cho `image-processing`.
 
 Chi tiết đầu vào/đầu ra của từng function xem `README.md` trong thư mục của function đó.
 
@@ -73,9 +74,16 @@ faas-cli up -f hello-world/hello-world.yml --tag sha
 
 ## Scale-to-zero
 
-OpenFaaS bản CE (bản đang dùng) **không có** tính năng tự co về 0; nhãn
-`com.openfaas.scale.zero` chỉ có tác dụng ở bản trả phí. Nhóm làm scale-to-zero bằng
-**KEDA** (`minReplicaCount: 0`, xem `../autoscaling/keda/`).
+OpenFaaS bản CE (bản đang dùng) **không có** scale-to-zero lẫn scale-from-zero. Đã kiểm
+chứng bằng thực nghiệm: faas-netes tự đưa function về lại 1 pod trong vài giây, không cần
+có request nào, và mỗi function bị giới hạn tối đa 5 pod. Nhãn `com.openfaas.scale.zero`
+chỉ có tác dụng ở bản trả phí.
+
+Dùng KEDA với `minReplicaCount: 0` **cũng không được**: KEDA và faas-netes giằng co, có
+khoảng 2 phút liền không pod nào sẵn sàng phục vụ. Mọi HPA và ScaledObject trong đồ án
+phải đặt số pod tối thiểu là 1 và tối đa là 5.
+
+Bằng chứng đầy đủ: [`../load-testing/results/scale-to-zero-test.md`](../load-testing/results/scale-to-zero-test.md).
 
 **Không** đặt nhãn `com.openfaas.scale.factor: "0"` cho function. Gateway OpenFaaS CE
 0.27.x coi giá trị 0 là không hợp lệ, mọi lần gọi function đều trả về:

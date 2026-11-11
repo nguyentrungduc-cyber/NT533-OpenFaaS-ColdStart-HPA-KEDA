@@ -1,12 +1,21 @@
 # hpa-config.yaml — Cấu hình HPA dựa trên CPU cho function OpenFaaS
-# TODO (Người 3): điền tên function thật + tinh chỉnh ngưỡng sau khi
-# có cluster + function chạy thật (từ Người 1, Người 2)
+# TODO (Người 3): tinh chỉnh ngưỡng sau khi có số liệu baseline.
 #
 # KHÔNG dùng cùng lúc với KEDA ScaledObject cho cùng một function. Gỡ KEDA trước:
 #   kubectl delete -f ../keda/keda-scaledobject.yaml --ignore-not-found
-# HPA không cho minReplicas = 0; scale-to-zero dùng KEDA.
-# Function hello-world gần như không tốn CPU nên khó kích HPA; khi so sánh thật
-# nên dùng function tốn CPU (ví dụ image-processing).
+#
+# minReplicas PHẢI >= 1 (HPA không cho 0) và maxReplicas PHẢI <= 5 (giới hạn bản CE).
+# Bản CE không có scale-to-zero, kể cả qua KEDA — xem
+# ../../load-testing/results/scale-to-zero-test.md
+#
+# Dùng function fibonacci: nó sinh tải CPU điều chỉnh được theo tham số n. Các function
+# nhẹ như hello-py gần như không tốn CPU nên không kích được HPA.
+# Function phải khai báo requests trong functions/stack.yml thì HPA theo CPU mới chạy,
+# vì HPA tính mức sử dụng theo phần trăm so với requests.
+#
+# Trước khi so sánh HPA với KEDA, phải tắt bộ co giãn có sẵn của bản CE:
+#   helm upgrade openfaas openfaas/openfaas -n openfaas --reuse-values \
+#     --set alertmanager.create=false
 
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler

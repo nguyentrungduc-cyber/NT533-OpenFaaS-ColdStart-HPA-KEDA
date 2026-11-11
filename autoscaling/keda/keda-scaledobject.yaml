@@ -1,9 +1,13 @@
 # keda-scaledobject.yaml — Cấu hình KEDA scale dựa trên RPS (Prometheus trigger)
 #
 # Điểm khác với HPA:
-#   - minReplicaCount: 0  → hỗ trợ scale-to-zero (HPA không làm được)
 #   - Trigger dựa trên request/s thực tế (RPS) thay vì CPU usage
 #   - Phản ứng nhanh hơn HPA khi tải tăng đột ngột
+#
+# minReplicaCount PHẢI >= 1 và maxReplicaCount PHẢI <= 5.
+# Trên OpenFaaS CE không dùng được scale-to-zero: faas-netes giữ mức sàn 1 pod và
+# giằng co với KEDA nếu đặt minReplicaCount: 0 (có lúc không pod nào sẵn sàng phục vụ).
+# Bằng chứng: ../../load-testing/results/scale-to-zero-test.md
 #
 # Yêu cầu:
 #   - KEDA đã cài trên cluster (Helm chart kedacore/keda, namespace keda)
@@ -25,6 +29,11 @@
 # Kiểm tra:
 #   kubectl get scaledobject -n openfaas-fn
 #   kubectl describe scaledobject hello-world-keda -n openfaas-fn
+#
+# Trước khi so sánh HPA với KEDA, phải tắt bộ co giãn có sẵn của bản CE, nếu không
+# sẽ có ba cơ chế cùng điều khiển số pod:
+#   helm upgrade openfaas openfaas/openfaas -n openfaas --reuse-values \
+#     --set alertmanager.create=false
 
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
@@ -34,9 +43,9 @@ metadata:
 spec:
   scaleTargetRef:
     name: hello-world           # khớp với tên Deployment OpenFaaS tạo ra
-  minReplicaCount: 0            # scale-to-zero khi không có request
+  minReplicaCount: 1            # bản CE không cho về 0, xem chú thích đầu file
   maxReplicaCount: 5
-  cooldownPeriod: 30            # giây chờ trước khi scale down về 0
+  cooldownPeriod: 30            # giây chờ trước khi giảm pod
   pollingInterval: 15           # giây giữa các lần KEDA poll Prometheus
   triggers:
     - type: prometheus
