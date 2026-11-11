@@ -1,0 +1,37 @@
+# ============================================================================
+# FILE MINH HOẠ LỖI — KHÔNG DÙNG TRONG THÍ NGHIỆM CHÍNH THỨC.
+#
+# OpenFaaS CE không cho function về 0 pod: faas-netes tự kéo về lại 1 pod trong
+# vài giây, không cần có request nào. Đặt minReplicaCount: 0 như file này khiến
+# KEDA và faas-netes giằng co, function gần như không phục vụ được: khoảng 2 phút
+# liền không có pod nào sẵn sàng, sau đó số pod nhảy qua lại.
+#
+# File được giữ lại làm bằng chứng cho kết luận đó. Bằng chứng đầy đủ (quan sát
+# số pod theo thời gian, events, managedFields) ở:
+#   load-testing/results/scale-to-zero-test.md, mục 6
+#
+# Mọi ScaledObject dùng thật phải đặt minReplicaCount >= 1 và maxReplicaCount <= 5
+# (giới hạn của bản CE). Xem autoscaling/keda/keda-scaledobject.yaml.
+#
+# KHÔNG apply cùng lúc với HPA trên hello-py: KEDA tự tạo HPA riêng, hai bên sẽ
+# tranh quyền điều khiển số pod.
+# ============================================================================
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: hello-py
+  namespace: openfaas-fn
+spec:
+  scaleTargetRef:
+    name: hello-py
+  minReplicaCount: 0
+  maxReplicaCount: 5
+  pollingInterval: 5
+  cooldownPeriod: 60
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus.openfaas:9090
+        query: sum(rate(gateway_function_invocation_total{function_name="hello-py.openfaas-fn"}[1m]))
+        threshold: "1"
+        activationThreshold: "0"
