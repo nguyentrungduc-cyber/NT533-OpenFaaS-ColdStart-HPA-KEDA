@@ -16,7 +16,7 @@ Phiên bản:
 | --- | --- |
 | Function có giữ được ở 0 pod không? | Không. faas-netes tự đưa về 1 pod trong vài giây, không cần request |
 | faas-netes có chặn việc tăng pod không? | Không. Tăng lên 3 pod giữ nguyên sau 60 giây |
-| Bộ co giãn có sẵn của CE có tự tăng pod khi tải cao? | CÓ, 3/4 14:49:52 |
+| Bộ co giãn có sẵn của CE có tự tăng pod khi tải cao? | CÓ. Tự tăng 1 → 4 pod, khoảng 40 giây thêm một pod; hết tải về thẳng 1 pod |
 | KEDA minReplicaCount 0 hoạt động thế nào? | Không co về 0 được; giằng co với faas-netes, khoảng 2 phút liền không có pod nào sẵn sàng. Phải đặt minReplicaCount >= 1 |
 | Thời gian tạo 1 pod mới tới khi sẵn sàng (thử 3 lần) | Lan 1: 5343 ms, Lan 2: 3011 ms, Lan 3: 2985 ms |
 
@@ -91,14 +91,17 @@ hello-py   3/3     3            3           2d5h
 
 Tải: k6, 10 VU, 120 giây, GET /function/hello-py, không có HPA hay KEDA.
 
+```
 HTTP
     http_req_duration..............: avg=5.8ms  min=1.46ms med=5.21ms max=66.61ms p(90)=8.9ms  p(95)=10.61ms
       { expected_response:true }...: avg=5.8ms  min=1.46ms med=5.21ms max=66.61ms p(90)=8.9ms  p(95)=10.61ms
     http_req_failed................: 0.00%  0 out of 205112
     http_reqs......................: 205112 1709.177412/s
+```
 
 Số pod theo thời gian (cửa sổ `get deployment -w`):
 
+```
 14:47:59 hello-py   1/1   1     1     2d6h
 14:48:04 hello-py   1/1   1     1     2d6h
 14:48:09 hello-py   1/1   1     1     2d6h
@@ -149,6 +152,7 @@ Số pod theo thời gian (cửa sổ `get deployment -w`):
 14:52:00 hello-py   1/1   1     1     2d6h
 14:52:05 hello-py   1/1   1     1     2d6h
 14:52:10 hello-py   1/1   1     1     2d6h
+```
 
 Kết luận: Số pod có tự tăng.
 
@@ -156,11 +160,14 @@ Kết luận: Số pod có tự tăng.
 
 File: autoscaling/keda/hello-py-scaletozero.yaml. Theo dõi 3 phút không gọi function.
 
+```
 NAME       SCALETARGETKIND      SCALETARGETNAME   MIN   MAX   READY   ACTIVE   FALLBACK   PAUSED   TRIGGERS     AUTHENTICATIONS   AGE
 hello-py   apps/v1.Deployment   hello-py          0     5     True    False    False      False    prometheus                     30s
+```
 
 Events sau 3 phút:
 
+```
 15:07:46 hello-py   0/1   1     0     2d6h
 15:07:51 hello-py   0/1   1     0     2d6h
 15:07:56 hello-py   0/1   1     0     2d6h
@@ -197,8 +204,11 @@ Events sau 3 phút:
 15:10:34 hello-py   1/1   1     1     2d6h
 15:10:39 hello-py   1/1   1     1     2d6h
 15:10:44 hello-py   1/1   1     1     2d6h
+```
 
 Events:
+
+```
   Type    Reason             Age                   From                   Message
   ----    ------             ----                  ----                   -------
   Normal  ScalingReplicaSet  25m (x4 over 43m)     deployment-controller  Scaled down replica set hello-py-c7c46d79b from 2 to 1
@@ -206,7 +216,7 @@ Events:
   Normal  ScalingReplicaSet  23m                   deployment-controller  Scaled up replica set hello-py-c7c46d79b from 2 to 3
   Normal  ScalingReplicaSet  5m49s (x31 over 84m)  deployment-controller  Scaled up replica set hello-py-c7c46d79b from 0 to 1
   Normal  ScalingReplicaSet  4m54s (x41 over 82m)  deployment-controller  Scaled down replica set hello-py-c7c46d79b from 1 to 0
-tranduc@k3s-master:~/NT533-OpenFaaS-ColdStart-HPA-KEDA$ kubectl -n openfaas-fn get hpa,scaledobject
+```
 
 Kết luận: ScaledObject hoạt động (READY True, ACTIVE False) nhưng KEDA và faas-netes giằng co:
 - 15:07:46 - 15:09:53: số pod mong muốn là 1 nhưng không có pod nào sẵn sàng (0/1) suốt khoảng 2 phút,
@@ -222,9 +232,11 @@ Chưa thử gọi function trong lúc giằng co.
 
 Đo thời gian từ lúc tăng 1 lên 2 pod tới khi pod thứ hai sẵn sàng (rollout status), 3 lần:
 
+```
 Lan 1: 5343 ms
 Lan 2: 3011 ms
 Lan 3: 2985 ms
+```
 
 ## Kết luận và đề xuất
 Nhận xét: lần 1 chậm hơn hẳn (5.3 s), có thể do pod được xếp lên worker chưa có image và phải tải về;
@@ -236,3 +248,31 @@ Chỉ 3 lần, để kiểm tra phương pháp; số liệu chính thức cần 
 2. Tăng pod không bị chặn, nên so sánh HPA vs KEDA vẫn làm được trong khoảng từ 1 pod trở lên.
 3. Cách đo cold-start trong tài liệu (hạ về 0 rồi gọi request) không dùng được. Đề xuất: đo thời gian một pod mới được tạo tới khi sẵn sàng.
 4. TN4 (warm-pool) đổi từ 0 / 1 / 2 thành 1 / 2 / 3 pod chờ sẵn.
+
+## 8. Chạy lại bước 2.3 sau khi tắt bộ co giãn của bản CE
+
+Mục 5 ở trên đo khi bộ co giãn có sẵn của bản CE vẫn đang bật. Sau khi Người 1 tắt nó,
+bài test được chạy lại với đúng cấu hình cũ để xác nhận. Chỉ khi số pod đứng yên thì phần
+so sánh HPA vs KEDA mới có ý nghĩa, vì lúc đó chỉ còn một cơ chế điều khiển số pod.
+
+Ngày chạy lại: <điền>
+Cách Người 1 đã tắt: <điền lệnh helm hoặc lệnh scale alertmanager>
+Cấu hình: k6, 10 VU, 120 giây, GET /function/hello-py, không HPA, không KEDA (giống mục 5).
+
+Tiêu chí đạt: số pod đứng yên ở 1 trong suốt bài test, k6 báo 0% lỗi.
+
+| Chỉ số | Trước khi tắt (mục 5) | Sau khi tắt |
+| --- | --- | --- |
+| Tổng số request | 205112 | <điền> |
+| Throughput (req/s) | 1709,18 | <điền> |
+| Tỉ lệ lỗi | 0,00% | <điền> |
+| p95 latency | 10,61 ms | <điền> |
+| Số pod tối đa | 4 | <điền — kỳ vọng 1> |
+
+Số pod theo thời gian:
+
+```
+<dán cửa sổ get deployment -w>
+```
+
+Kết luận: <điền sau khi chạy>
