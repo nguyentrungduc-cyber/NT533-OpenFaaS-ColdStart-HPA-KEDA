@@ -19,11 +19,21 @@ load-testing/
     └── hpa-vs-keda/             # Kết quả so sánh 2 chiến lược scale
 ```
 
-## Cách chạy (điền khi hoàn thành)
+## Cách chạy
+
+Chạy từ thư mục `load-testing/`. Mặc định script gọi gateway `http://192.168.243.10:31112`;
+từ máy khác qua Tailscale thì thêm `-e GATEWAY=http://100.88.160.40:31112`.
 
 ```bash
 k6 run k6-scripts/coldstart-test.js --out json=results/coldstart/run-01.json
+k6 run k6-scripts/autoscaling-test.js --out json=results/hpa-vs-keda/hpa-run-01.json
 ```
+
+Hai script hiện gọi function `hello-world`; quy trình bật/tắt HPA và KEDA giữa các lần chạy
+ghi ở đầu `k6-scripts/autoscaling-test.js`.
+
+`.gitignore` bỏ qua mọi file `*.json` trong `results/` (file thô rất lớn), chỉ giữ file
+`*.summary.json`. Muốn đưa kết quả lên repo thì lưu bản tóm tắt với đuôi `.summary.json`.
 
 ## Timeline (theo đề cương)
 

@@ -2,18 +2,25 @@
 
 ## Mục tiêu
 
-Cài đặt OpenFaaS Gateway trên cluster, viết tối thiểu 5 serverless
-functions minh họa, cấu hình scale-to-zero.
+Cấu hình OpenFaaS Gateway (Người 1 đã cài sẵn trên cluster), viết tối thiểu 5
+serverless functions minh họa, cấu hình scale-to-zero.
 
 ## Danh sách function (theo đề cương — tối thiểu 5)
 
-| Function | Mục đích | Trạng thái |
-|---|---|---|
-| `hello-world` | Function demo tối thiểu, dùng test nhanh gateway/scale-to-zero | ✅ Code sẵn sàng |
-| `image-processing` | Xử lý ảnh (resize/filter...) | ⬜ Chưa làm |
-| `email-sender` | Gửi email | ⬜ Chưa làm |
-| `data-processor` | Xử lý dữ liệu | ⬜ Chưa làm |
-| `pdf-generator` | Tạo PDF | ⬜ Chưa làm |
+| Function | Mục đích | Khai báo ở | Trạng thái |
+|---|---|---|---|
+| `hello-world` | Function demo tối thiểu, test nhanh gateway, baseline đo cold-start | `hello-world/hello-world.yml` | ✅ Code sẵn sàng |
+| `hello-py` | Function demo trả về chuỗi cố định | `stack.yml` | ✅ Code sẵn sàng |
+| `fibonacci` | Tạo tải CPU điều chỉnh được, dùng thử HPA vs KEDA | `stack.yml` | ✅ Code sẵn sàng |
+| `text-sentiment` | Phân tích cảm xúc văn bản, function nhẹ để đo throughput | `stack.yml` | ✅ Code sẵn sàng |
+| `notify` | Mô phỏng gửi thông báo (chỉ ghi log, không gửi email thật) | `stack.yml` | ✅ Code sẵn sàng |
+| `image-resize` | Resize ảnh bằng Pillow, image lớn, tốn CPU | `stack.yml` | ✅ Code sẵn sàng |
+| `image-processing` | Xử lý ảnh (resize/filter...) | — | ⬜ Chưa làm |
+| `email-sender` | Gửi email | — | ⬜ Chưa làm |
+| `data-processor` | Xử lý dữ liệu | — | ⬜ Chưa làm |
+| `pdf-generator` | Tạo PDF | — | ⬜ Chưa làm |
+
+Chi tiết đầu vào/đầu ra của từng function xem `README.md` trong thư mục của function đó.
 
 ## Cấu trúc mỗi function (chuẩn OpenFaaS)
 
@@ -23,6 +30,12 @@ functions/<ten-function>/
 ├── requirements.txt     # (nếu Python) hoặc package.json (nếu Node)
 └── <ten-function>.yml   # OpenFaaS function definition (handler: ./<ten-function>)
 ```
+
+Có 2 cách khai báo function, workflow build nhận cả hai:
+
+- Mỗi function một file `functions/<ten-function>/<ten-function>.yml` (như `hello-world`)
+- Gom chung vào `functions/stack.yml` (như `hello-py`, `fibonacci`, `text-sentiment`,
+  `notify`, `image-resize`); khi đó thư mục function không cần file `.yml` riêng
 
 ## Cách build và deploy
 
@@ -40,6 +53,14 @@ git pull
 cd functions
 faas-cli deploy -f hello-world/hello-world.yml --tag sha
 faas-cli invoke hello-world <<< ""
+```
+
+Các function khai báo trong `stack.yml` deploy cùng lúc (vẫn từ thư mục `functions/`):
+
+```bash
+faas-cli deploy -f stack.yml --tag sha
+# hoặc chỉ một function:
+faas-cli deploy -f stack.yml --filter fibonacci --tag sha
 ```
 
 `--tag sha` gắn mã commit vào tên image, nên phải `git pull` đúng commit mà Actions vừa build.
