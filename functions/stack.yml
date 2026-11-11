@@ -7,6 +7,8 @@ configuration:
   templates:
     - name: python3-http
       source: https://github.com/openfaas/python-flask-template
+    - name: node24
+      source: https://github.com/openfaas/templates
 
 functions:
   hello-py:
@@ -33,3 +35,10 @@ functions:
     lang: python3-http
     handler: ./image-resize
     image: ghcr.io/nguyentrungduc-cyber/image-resize:latest
+
+  data-transform:
+    lang: node24
+    handler: ./data-transform
+    image: ghcr.io/nguyentrungduc-cyber/data-transform:latest
+    environment:
+      MAX_JSON_SIZE: 1mb
