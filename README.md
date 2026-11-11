@@ -33,15 +33,14 @@ kubeadm để giảm tải RAM. Thành viên khác truy cập qua Tailscale.
 │   └── networking/               # Cấu hình mạng nội bộ, Ingress
 │
 ├── functions/                   # Người 2 — Serverless Platform & Cold-start
-│   ├── stack.yml                  # Khai báo chung: hello-py, fibonacci, text-sentiment, notify, image-resize
-│   ├── hello-world/               # Function demo tối thiểu, baseline đo cold-start
-│   ├── hello-py/                  # Function demo (khai báo trong stack.yml)
+│   ├── stack.yml                  # Khai báo chung 6 function
+│   ├── hello-world/               # Bộ khung ban đầu, file .yml riêng
+│   ├── hello-py/                  # Function demo tối thiểu
 │   ├── fibonacci/                 # Tải CPU điều chỉnh được (thử HPA vs KEDA)
 │   ├── text-sentiment/            # Phân tích cảm xúc văn bản, function nhẹ
 │   ├── notify/                    # Mô phỏng gửi thông báo (chỉ ghi log)
-│   ├── image-resize/              # Resize ảnh bằng Pillow, image lớn
-│   └── image-processing/, email-sender/, data-processor/, pdf-generator/
-│                                  # Chỉ có README hướng dẫn, chưa triển khai
+│   ├── image-resize/              # Resize ảnh bằng Pillow, image lớn (TN2, TN3)
+│   └── data-transform/            # Node.js, đối chiếu cold-start với Python
 │
 ├── coldstart-optimization/       # Người 2 — Trọng tâm nghiên cứu #1
 │   ├── warm-pool/                  # Chiến lược giữ pod ấm sẵn
@@ -105,7 +104,8 @@ Xem chi tiết timeline từng tuần tại [`docs/weekly-reports/README.md`](./
 ## Kết quả mong đợi
 
 - Cụm Kubernetes multi-node hoạt động ổn định, demo trực tiếp được
-- OpenFaaS với tối thiểu 5 function thực tế, scale-to-zero bằng KEDA
+- OpenFaaS với 6 function thực tế, co giãn trong khoảng 1-5 pod mỗi function
+  (bản CE không hỗ trợ scale-to-zero — xem `load-testing/results/scale-to-zero-test.md`)
 - Biểu đồ so sánh cold-start latency giữa các chiến lược tối ưu
 - Biểu đồ so sánh hiệu năng HPA vs KEDA
 - Dashboard Grafana trực quan thời gian thực
