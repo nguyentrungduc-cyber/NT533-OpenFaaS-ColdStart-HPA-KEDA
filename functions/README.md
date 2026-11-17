@@ -72,6 +72,28 @@ Phương án dự phòng (laptop có Docker Desktop), cũng chạy từ `functio
 faas-cli up -f hello-world/hello-world.yml --tag sha
 ```
 
+## imagePullPolicy: phải vá bằng tay sau mỗi lần deploy
+
+Để số đo cold-start không lẫn thời gian đi mạng tới registry, function phải chạy với
+`imagePullPolicy: IfNotPresent`. Tham số của chart (`functions.imagePullPolicy`) **không
+có tác dụng**: biến môi trường xuống tới faas-netes đúng, nhưng faas-netes 0.18.17 CE vẫn
+tạo Deployment với `Always`. Đã thử cả `faas-cli deploy` đè lên và `faas-cli remove` rồi
+deploy lại, đều không ăn (kiểm chứng 17/11/2026).
+
+Cách duy nhất chạy được là vá thẳng Deployment. Dùng script có sẵn:
+
+```bash
+./infra/scripts/fix-pullpolicy.sh
+```
+
+**Chạy lại sau mỗi lần `faas-cli deploy`**, vì deploy ghi đè về `Always`. Chạy script
+rồi mới đo. Kiểm tra:
+
+```bash
+kubectl -n openfaas-fn get deploy \
+  -o custom-columns=NAME:.metadata.name,POLICY:.spec.template.spec.containers[0].imagePullPolicy
+```
+
 ## Scale-to-zero
 
 OpenFaaS bản CE (bản đang dùng) **không có** scale-to-zero lẫn scale-from-zero. Đã kiểm
