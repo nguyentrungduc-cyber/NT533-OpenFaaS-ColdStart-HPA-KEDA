@@ -1,0 +1,36 @@
+# Event Kubernetes ve viec keo image data-transform, lay luc 17/11/2026 13:11 (gio VN)
+# Lenh: kubectl -n openfaas-fn get events | grep data-transform | grep -i pull | grep -v "already present"
+# Cot dau la thoi gian TINH TU LUC CHAY LENH (124m = 124 phut truoc), khong phai gio tuyet doi.
+# Dong quan trong: pod data-transform-686869bfb8-2vvm2 (lan do dau TN1, worker3) keo latest-9aaddd3 mat 12.368s.
+
+124m        Normal    Pulling                 pod/data-transform-55f7c8d9d-plvcg     Pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-74ac631"
+124m        Warning   Failed                  pod/data-transform-55f7c8d9d-plvcg     Failed to pull image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-74ac631": failed to pull and unpack image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-74ac631": failed to resolve reference "ghcr.io/nguyentrungduc-cyber/data-transform:latest-74ac631": failed to do request: Head "https://ghcr.io/v2/nguyentrungduc-cyber/data-transform/manifests/latest-74ac631": dial tcp: lookup ghcr.io: Try again
+124m        Warning   Failed                  pod/data-transform-55f7c8d9d-plvcg     Error: ErrImagePull
+124m        Normal    BackOff                 pod/data-transform-55f7c8d9d-plvcg     Back-off pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-74ac631"
+124m        Warning   Failed                  pod/data-transform-55f7c8d9d-plvcg     Error: ImagePullBackOff
+124m        Normal    Pulled                  pod/data-transform-55f7c8d9d-plvcg     Successfully pulled image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-74ac631" in 18.712s (18.712s including waiting). Image size: 73022058 bytes.
+115m        Normal    Pulling                 pod/data-transform-6558c4b466-qbvl5    Pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-9aaddd3"
+115m        Normal    Pulled                  pod/data-transform-6558c4b466-qbvl5    Successfully pulled image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-9aaddd3" in 25.918s (25.918s including waiting). Image size: 73022216 bytes.
+10m         Normal    Pulling                 pod/data-transform-686869bfb8-2vvm2    Pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-9aaddd3"
+9m59s       Normal    Pulled                  pod/data-transform-686869bfb8-2vvm2    Successfully pulled image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-9aaddd3" in 12.368s (12.368s including waiting). Image size: 73022216 bytes.
+115m        Normal    Pulling                 pod/data-transform-686869bfb8-66mq4    Pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-9aaddd3"
+115m        Normal    Pulled                  pod/data-transform-686869bfb8-66mq4    Successfully pulled image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-9aaddd3" in 21.815s (21.815s including waiting). Image size: 73022216 bytes.
+5d14h       Normal    Pulling                 pod/data-transform-6b88bf68fd-xnwg4    Pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-7f53a81"
+5d14h       Normal    Pulled                  pod/data-transform-6b88bf68fd-xnwg4    Successfully pulled image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-7f53a81" in 2.196s (2.196s including waiting). Image size: 72983559 bytes.
+126m        Normal    Pulling                 pod/data-transform-77549df7ff-hnb89    Pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-74ac631"
+125m        Normal    Pulled                  pod/data-transform-77549df7ff-hnb89    Successfully pulled image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-74ac631" in 49.887s (49.887s including waiting). Image size: 73022058 bytes.
+135m        Normal    Pulling                 pod/data-transform-77b5dc466f-tmhf7    Pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8"
+134m        Normal    Pulled                  pod/data-transform-77b5dc466f-tmhf7    Successfully pulled image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8" in 1m23.017s (1m23.017s including waiting). Image size: 72983294 bytes.
+5d14h       Normal    Pulling                 pod/data-transform-84bb5d46ff-vq5v7    Pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8"
+5d14h       Warning   Failed                  pod/data-transform-84bb5d46ff-vq5v7    Failed to pull image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8": failed to pull and unpack image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8": failed to copy: httpReadSeeker: failed open: failed to authorize: failed to fetch anonymous token: Get "https://ghcr.io/token?scope=%5BREDACTED%5D&service=%5BREDACTED%5D": dial tcp 20.205.243.164:443: connect: connection refused
+5d14h       Warning   Failed                  pod/data-transform-84bb5d46ff-vq5v7    Error: ErrImagePull
+5d14h       Normal    BackOff                 pod/data-transform-84bb5d46ff-vq5v7    Back-off pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8"
+5d14h       Warning   Failed                  pod/data-transform-84bb5d46ff-vq5v7    Error: ImagePullBackOff
+5d13h       Normal    Pulling                 pod/data-transform-84bb5d46ff-vq5v7    Pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8"
+5d13h       Normal    Pulled                  pod/data-transform-84bb5d46ff-vq5v7    Successfully pulled image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8" in 25.235s (25.235s including waiting). Image size: 72983294 bytes.
+5d13h       Normal    Pulling                 pod/data-transform-84bb5d46ff-vq5v7    Pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8"
+5d13h       Normal    Pulled                  pod/data-transform-84bb5d46ff-vq5v7    Successfully pulled image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8" in 1.033s (1.033s including waiting). Image size: 72983294 bytes.
+3h33m       Normal    Pulling                 pod/data-transform-84bb5d46ff-vq5v7    Pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8"
+3h33m       Normal    Pulled                  pod/data-transform-84bb5d46ff-vq5v7    Successfully pulled image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8" in 1.326s (1.326s including waiting). Image size: 72983294 bytes.
+145m        Normal    Pulling                 pod/data-transform-84bb5d46ff-vq5v7    Pulling image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8"
+145m        Normal    Pulled                  pod/data-transform-84bb5d46ff-vq5v7    Successfully pulled image "ghcr.io/nguyentrungduc-cyber/data-transform:latest-44a98f8" in 2.714s (2.714s including waiting). Image size: 72983294 bytes.
