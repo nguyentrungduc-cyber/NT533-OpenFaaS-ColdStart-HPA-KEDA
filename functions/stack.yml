@@ -20,6 +20,17 @@ functions:
     lang: python3-http
     handler: ./fibonacci
     image: ghcr.io/nguyentrungduc-cyber/fibonacci:latest
+    # HPA tính mức dùng CPU theo phần trăm so với requests, nên function phải
+    # khai báo requests thì HPA theo CPU mới kích hoạt được. fibonacci là function
+    # dùng cho TN5 (so sánh HPA vs KEDA) nên bắt buộc có.
+    # Con số dưới đây là mức khởi điểm, cần chốt lại với Huỳnh Qui sau khi có
+    # baseline: ngưỡng HPA 50% ứng với 50m CPU.
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 128Mi
 
   text-sentiment:
     lang: python3-http
