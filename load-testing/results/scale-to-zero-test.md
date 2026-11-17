@@ -238,6 +238,90 @@ Lan 2: 3011 ms
 Lan 3: 2985 ms
 ```
 
+## 8. Chạy lại bước 2.3 sau khi tắt bộ co giãn của bản CE
+
+Mục 5 ở trên đo khi bộ co giãn có sẵn của bản CE vẫn đang bật. Sau khi Người 1 tắt nó,
+bài test được chạy lại với đúng cấu hình cũ để xác nhận. Chỉ khi số pod đứng yên thì phần
+so sánh HPA vs KEDA mới có ý nghĩa, vì lúc đó chỉ còn một cơ chế điều khiển số pod.
+
+Ngày chạy lại: 17/11/2026
+
+Cách Người 1 đã tắt:
+
+```bash
+helm upgrade openfaas openfaas/openfaas -n openfaas --reuse-values \
+  --set alertmanager.create=false
+```
+
+Xác nhận đã tắt, hai bằng chứng độc lập:
+
+```
+$ helm get values openfaas -n openfaas --all | grep -A2 alertmanager
+alertmanager:
+  create: false
+
+$ kubectl -n openfaas get deploy
+NAME           READY   UP-TO-DATE   AVAILABLE   AGE
+gateway        1/1     1            1           44d
+nats           1/1     1            1           44d
+prometheus     1/1     1            1           44d
+queue-worker   1/1     1            1           44d
+```
+
+Deployment `alertmanager` đã bị gỡ hẳn khỏi chart, không phải scale về 0, nên các lần
+`helm upgrade` sau vẫn không dựng lại nó.
+
+Cấu hình bài test: k6, 10 VU, 120 giây, GET /function/hello-py, không HPA, không KEDA
+(giống hệt mục 5). Kiểm tra điều kiện trước khi chạy:
+
+```
+$ kubectl -n openfaas-fn get hpa,scaledobject
+No resources found in openfaas-fn namespace.
+```
+
+Tiêu chí đạt: số pod đứng yên ở 1 trong suốt bài test, k6 báo 0% lỗi. **Kết quả: ĐẠT.**
+
+| Chỉ số | Trước khi tắt (mục 5) | Sau khi tắt |
+| --- | --- | --- |
+| Tổng số request | 205112 | 90638 |
+| Throughput (req/s) | 1709,18 | 755,27 |
+| Tỉ lệ lỗi | 0,00% | 0,00% |
+| p95 latency | 10,61 ms | 23,35 ms |
+| Số pod tối đa | 4 | 1 |
+
+Kết quả k6:
+
+```
+  █ TOTAL RESULTS
+
+    checks_total.......: 90638   755.27071/s
+    checks_succeeded...: 100.00% 90638 out of 90638
+    checks_failed......: 0.00%   0 out of 90638
+
+    HTTP
+    http_req_duration..: avg=13.13ms min=2.09ms med=11.59ms max=370.79ms p(90)=19.55ms p(95)=23.35ms
+    http_req_failed....: 0.00%  0 out of 90638
+    http_reqs..........: 90638  755.27071/s
+```
+
+Số pod theo thời gian: theo dõi liên tục bằng `kubectl -n openfaas-fn get deployment
+hello-py -w` trong suốt 120 giây. Deployment giữ nguyên 1/1 từ đầu tới cuối, cửa sổ không
+in thêm dòng thay đổi nào. So với mục 5, khi số pod tự tăng 1 → 4.
+
+### Nhận xét
+
+Throughput giảm còn 44% và p95 tăng hơn gấp đôi so với mục 5. Đây đúng là điều phải xảy
+ra: ở mục 5 có tới 4 pod chia nhau tải, còn lần này chỉ 1 pod gánh toàn bộ. Việc hiệu năng
+giảm ở đây là **bằng chứng cho thấy bộ co giãn đã tắt**, không phải dấu hiệu cụm có vấn đề.
+
+Kiểm tra chéo tính nhất quán của hai phép đo: 1709 / 755 ≈ 2,26. Ở mục 5 số pod tăng dần
+1 → 4 với khoảng cách ~40 giây mỗi pod, nên số pod trung bình trong 120 giây vào khoảng
+2–2,5. Tỉ lệ throughput khớp với tỉ lệ số pod trung bình, nên hai lần đo nhất quán.
+
+Lưu ý khi dùng số liệu này: hai lần đo cách nhau 16 ngày và mục 5 chạy trên cụm có cấu hình
+cũ, nên chỉ nên dùng để so sánh tương đối (có/không có bộ co giãn), không dùng làm số liệu
+hiệu năng tuyệt đối.
+
 ## Kết luận và đề xuất
 Nhận xét: lần 1 chậm hơn hẳn (5.3 s), có thể do pod được xếp lên worker chưa có image và phải tải về;
 lần 2 và 3 ổn định quanh 3.0 s (image đã có sẵn). Theo quy ước nhóm, bỏ lần đầu.
@@ -248,31 +332,4 @@ Chỉ 3 lần, để kiểm tra phương pháp; số liệu chính thức cần 
 2. Tăng pod không bị chặn, nên so sánh HPA vs KEDA vẫn làm được trong khoảng từ 1 pod trở lên.
 3. Cách đo cold-start trong tài liệu (hạ về 0 rồi gọi request) không dùng được. Đề xuất: đo thời gian một pod mới được tạo tới khi sẵn sàng.
 4. TN4 (warm-pool) đổi từ 0 / 1 / 2 thành 1 / 2 / 3 pod chờ sẵn.
-
-## 8. Chạy lại bước 2.3 sau khi tắt bộ co giãn của bản CE
-
-Mục 5 ở trên đo khi bộ co giãn có sẵn của bản CE vẫn đang bật. Sau khi Người 1 tắt nó,
-bài test được chạy lại với đúng cấu hình cũ để xác nhận. Chỉ khi số pod đứng yên thì phần
-so sánh HPA vs KEDA mới có ý nghĩa, vì lúc đó chỉ còn một cơ chế điều khiển số pod.
-
-Ngày chạy lại: <điền>
-Cách Người 1 đã tắt: <điền lệnh helm hoặc lệnh scale alertmanager>
-Cấu hình: k6, 10 VU, 120 giây, GET /function/hello-py, không HPA, không KEDA (giống mục 5).
-
-Tiêu chí đạt: số pod đứng yên ở 1 trong suốt bài test, k6 báo 0% lỗi.
-
-| Chỉ số | Trước khi tắt (mục 5) | Sau khi tắt |
-| --- | --- | --- |
-| Tổng số request | 205112 | <điền> |
-| Throughput (req/s) | 1709,18 | <điền> |
-| Tỉ lệ lỗi | 0,00% | <điền> |
-| p95 latency | 10,61 ms | <điền> |
-| Số pod tối đa | 4 | <điền — kỳ vọng 1> |
-
-Số pod theo thời gian:
-
-```
-<dán cửa sổ get deployment -w>
-```
-
-Kết luận: <điền sau khi chạy>
+5. Bộ co giãn có sẵn của bản CE đã được tắt và kiểm chứng lại ngày 17/11/2026 (mục 8): số pod đứng yên ở 1 trong suốt bài test, 0% lỗi. Từ đây trở đi chỉ còn HPA hoặc KEDA điều khiển số pod, nên TN5 (so sánh HPA vs KEDA) đã đủ điều kiện để chạy.
