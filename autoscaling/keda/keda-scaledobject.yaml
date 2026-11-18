@@ -2,7 +2,17 @@
 #
 # Điểm khác với HPA:
 #   - Trigger dựa trên request/s thực tế (RPS) thay vì CPU usage
-#   - Phản ứng nhanh hơn HPA khi tải tăng đột ngột
+#   - Giả thuyết cần TN5 kiểm chứng: phản ứng nhanh hơn HPA khi tải tăng đột ngột
+#
+# Lưu ý về cooldownPeriod và pollingInterval (theo tài liệu ScaledObject của KEDA):
+#   KEDA chỉ tự quyết việc chuyển 0 <-> 1 pod. Từ 1 đến N pod, việc tăng/giảm do HPA
+#   mà KEDA tạo ra (keda-hpa-<tên>) đảm nhận. Vì minReplicaCount = 1 nên:
+#   - cooldownPeriod KHÔNG có tác dụng (nó chỉ áp dụng khi scale về 0).
+#   - Giảm pod theo stabilization window mặc định của HPA: 300 giây, y như HPA thuần.
+#     Muốn đổi thì đặt advanced.horizontalPodAutoscalerConfig.behavior.scaleDown,
+#     và nếu đổi thì phải đổi giống hệt cho HPA thuần để so sánh công bằng.
+#   - HPA hỏi metric theo chu kỳ của kube-controller-manager (mặc định 15 giây),
+#     nên pollingInterval nhỏ hơn không làm KEDA phản ứng nhanh hơn ở dải 1..N.
 #
 # minReplicaCount PHẢI >= 1 và maxReplicaCount PHẢI <= 5.
 # Trên OpenFaaS CE không dùng được scale-to-zero: faas-netes giữ mức sàn 1 pod và
@@ -45,8 +55,8 @@ spec:
     name: hello-world           # khớp với tên Deployment OpenFaaS tạo ra
   minReplicaCount: 1            # bản CE không cho về 0, xem chú thích đầu file
   maxReplicaCount: 5
-  cooldownPeriod: 30            # giây chờ trước khi giảm pod
-  pollingInterval: 15           # giây giữa các lần KEDA poll Prometheus
+  cooldownPeriod: 30            # chỉ có tác dụng khi scale về 0; với min=1 thì HPA lo việc giảm pod, mặc định chờ 300 giây
+  pollingInterval: 15           # chu kỳ KEDA poll Prometheus; ở dải 1..N, HPA vẫn hỏi metric mỗi 15 giây
   triggers:
     - type: prometheus
       metadata:
@@ -61,5 +71,5 @@ spec:
         # Scale up khi RPS vượt ngưỡng này
         # Tinh chỉnh sau khi có số liệu baseline từ load test
         threshold: "10"
-        # Có request (giá trị > 0) là bật từ 0 lên 1 pod
+        # Ngưỡng bật 0 -> 1 pod; không có tác dụng vì minReplicaCount = 1
         activationThreshold: "0"
