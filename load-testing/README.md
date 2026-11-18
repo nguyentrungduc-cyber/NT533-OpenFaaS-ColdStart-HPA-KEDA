@@ -56,7 +56,7 @@ tạo tải lên cụm trong lúc đo. Chạy trên master, từ thư mục `loa
    date +%s%3N > results/hpa-vs-keda/${TOOL}_spike_run1.start
    k6 run -e PROFILE=spike -e C=40 --summary-trend-stats="avg,min,med,max,p(90),p(95),p(99)"      --summary-export=results/hpa-vs-keda/${TOOL}_spike_run1.summary.json k6-scripts/hpa-vs-keda.js
    ```
-5. Dừng `record-replicas.sh` (Ctrl+C), chờ 6 phút cho pod giảm về 1 trước lần đo sau (HPA chờ 5 phút mới giảm pod).
+5. Dừng `record-replicas.sh` (Ctrl+C) khi pod đã về 1 (để đo được thời gian giảm pod; `analyze.py` tự cắt mọi lần đo của cùng kịch bản về cùng một cửa sổ thời gian = lần ghi ngắn nhất, nên pod-giây so sánh được), chờ 6 phút cho pod giảm về 1 trước lần đo sau (HPA chờ 5 phút mới giảm pod).
 6. Tên file dạng `<hpa|keda>_<kịch bản>_run<N>` với đủ 3 đuôi `.csv`, `.start`, `.summary.json`.
    Mỗi cặp (bộ co giãn x kịch bản) chạy 5 lần. `.csv` và `.start` được giữ trong git; `.summary.json` cũng được giữ.
 7. Phân tích: `python analysis/analyze.py hpa-vs-keda` (cần pandas, matplotlib); kết quả ở `analysis/out/`.
