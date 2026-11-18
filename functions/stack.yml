@@ -7,6 +7,9 @@ configuration:
   templates:
     - name: python3-http
       source: https://github.com/openfaas/python-flask-template
+    # Bản Debian của python3-http, cùng repo template. Chỉ dùng cho fib-debian (TN2).
+    - name: python3-http-debian
+      source: https://github.com/openfaas/python-flask-template
     - name: node24
       source: https://github.com/openfaas/templates
 
@@ -25,6 +28,22 @@ functions:
     # dùng cho TN5 (so sánh HPA vs KEDA) nên bắt buộc có.
     # Con số dưới đây là mức khởi điểm, cần chốt lại với Huỳnh Qui sau khi có
     # baseline: ngưỡng HPA 50% ứng với 50m CPU.
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 128Mi
+
+  # TN2: cùng mã nguồn với fibonacci (handler ./fibonacci), chỉ khác image nền
+  # (Debian slim thay vì Alpine) để so cold-start theo kích thước image.
+  # requests/limits giữ y hệt fibonacci để không thêm biến nào khác.
+  fib-debian:
+    lang: python3-http-debian
+    handler: ./fibonacci
+    image: ghcr.io/nguyentrungduc-cyber/fib-debian:latest
+    build_args:
+      PYTHON_VERSION: "3.12"
     requests:
       cpu: 100m
       memory: 64Mi
