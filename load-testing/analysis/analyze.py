@@ -33,22 +33,31 @@ def metric(summary, name, key):
     return m.get("values", m)[key]  # k6 ban cu co "values", ban moi khong
 
 
-def analyze_run(base):
-    """Tinh cac chi so cho mot lan do. base = duong dan khong co duoi file."""
+def load_run(base):
+    """Doc file .csv va .start, them cot t (giay tinh tu luc bat dau tai)."""
     df = pd.read_csv(base + ".csv")
     df["ready"] = pd.to_numeric(df["ready"], errors="coerce").fillna(0)
     df["desired"] = pd.to_numeric(df["desired"], errors="coerce")
     t0 = int(open(base + ".start").read().strip())
     df["t"] = (df["ts_ms"] - t0) / 1000.0
-    before, after = df[df["t"] < 0], df[df["t"] >= 0]
+    return df
+
+
+def analyze_run(base, df, window):
+    """Tinh cac chi so cho mot lan do. Chi xet [0, window] giay de cac lan do so sanh duoc voi nhau."""
+    before, after = df[df["t"] < 0], df[(df["t"] >= 0) & (df["t"] <= window)]
     start_desired = before["desired"].iloc[-1] if len(before) else after["desired"].iloc[0]
     up = after[after["desired"] > start_desired]
     peak = after["ready"].max()
+    base_ready = before["ready"].iloc[-1] if len(before) else after["ready"].iloc[0]
+    last_peak = after[after["ready"] >= peak]["t"].iloc[-1]
+    down = after[(after["t"] > last_peak) & (after["ready"] <= base_ready)]
     s = json.load(open(base + ".summary.json"))
-    return df, {
+    return {
         "react_s": up["t"].iloc[0] if len(up) else float("nan"),  # tai tang -> desired tang lan dau
         "full_s": after[after["ready"] >= peak]["t"].iloc[0],     # tai tang -> ready dat muc cao nhat
         "peak_ready": peak,
+        "scale_down_s": down["t"].iloc[0] - last_peak if len(down) else float("nan"),  # tu luc dinh -> ve muc ban dau
         "pod_seconds": (after["ready"] * after["t"].diff().fillna(0)).sum(),  # chi phi tai nguyen
         "p95_ms": metric(s, "http_req_duration", "p(95)"),
         "p99_ms": metric(s, "http_req_duration", "p(99)"),
@@ -58,20 +67,29 @@ def analyze_run(base):
 
 def hpa_vs_keda(folder):
     os.makedirs(OUT, exist_ok=True)
-    rows, series = [], {}
+    runs = {}
     for csv in sorted(glob.glob(os.path.join(folder, "*_run*.csv"))):
         base = csv[:-4]
         m = re.match(r"(hpa|keda)_(\w+)_run(\d+)$", os.path.basename(base))
         if not m:
             continue
-        tool, profile, run = m.group(1), m.group(2), int(m.group(3))
         try:
-            df, r = analyze_run(base)
+            df = load_run(base)
+            json.load(open(base + ".summary.json"))
         except FileNotFoundError as e:
             print(f"bo qua {os.path.basename(base)}: thieu file {e.filename}")
             continue
-        rows.append({"tool": tool, "profile": profile, "run": run, **r})
+        runs[(m.group(1), m.group(2), int(m.group(3)))] = (base, df)
+    # cac lan do cua cung kich ban dung chung mot cua so thoi gian = lan ghi ngan nhat
+    window = {}
+    for (tool, profile, run), (base, df) in runs.items():
+        window[profile] = min(window.get(profile, float("inf")), df["t"].max())
+    rows, series = [], {}
+    for (tool, profile, run), (base, df) in runs.items():
+        rows.append({"tool": tool, "profile": profile, "run": run, **analyze_run(base, df, window[profile])})
         series[(tool, profile, run)] = df
+    for profile, w in window.items():
+        print(f"kich ban {profile}: cua so so sanh = {w:.0f} giay (lan ghi ngan nhat)")
     if not rows:
         sys.exit("khong co lan do nao du 3 file .csv/.start/.summary.json")
 
