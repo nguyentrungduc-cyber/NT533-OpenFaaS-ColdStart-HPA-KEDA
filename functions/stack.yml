@@ -26,10 +26,11 @@ functions:
     # HPA tính mức dùng CPU theo phần trăm so với requests, nên function phải
     # khai báo requests thì HPA theo CPU mới kích hoạt được. fibonacci là function
     # dùng cho TN5 (so sánh HPA vs KEDA) nên bắt buộc có.
-    # Con số dưới đây là mức khởi điểm, cần chốt lại với Huỳnh Qui sau khi có
-    # baseline: ngưỡng HPA 50% ứng với 50m CPU.
+    # Đã chốt theo baseline (C = 40 req/s, xem autoscaling/README.md): ngưỡng HPA 50%
+    # ứng với 175m CPU, tương đương khoảng 24 req/s mỗi pod. Không đổi nữa trước khi
+    # đo chính thức HPA vs KEDA.
     requests:
-      cpu: 100m
+      cpu: 350m
       memory: 64Mi
     limits:
       cpu: 500m
