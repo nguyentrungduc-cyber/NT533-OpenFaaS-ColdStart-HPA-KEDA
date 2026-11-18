@@ -1,0 +1,11 @@
+k3s-master
+  ghcr.io/nguyentrungduc-cyber/fibonacci@sha256:44517107ddf8d930654f84e1b0b9b5802fc7d6c0449fa9ff435ea1b60e2cefc0 ghcr.io/nguyentrungduc-cyber/fibonacci:latest-5ee7c6f	36317967
+k3s-worker1
+  ghcr.io/nguyentrungduc-cyber/fib-debian@sha256:4ac23326ce14d3e294241c4d906d6cb6856fa1a30bb2f089bdc7df52f1d0f862 ghcr.io/nguyentrungduc-cyber/fib-debian:latest-5ee7c6f	125049508
+  ghcr.io/nguyentrungduc-cyber/fibonacci@sha256:44517107ddf8d930654f84e1b0b9b5802fc7d6c0449fa9ff435ea1b60e2cefc0 ghcr.io/nguyentrungduc-cyber/fibonacci:latest-5ee7c6f	36317967
+k3s-worker2
+  ghcr.io/nguyentrungduc-cyber/fib-debian@sha256:4ac23326ce14d3e294241c4d906d6cb6856fa1a30bb2f089bdc7df52f1d0f862 ghcr.io/nguyentrungduc-cyber/fib-debian:latest-5ee7c6f	125049508
+  ghcr.io/nguyentrungduc-cyber/fibonacci@sha256:44517107ddf8d930654f84e1b0b9b5802fc7d6c0449fa9ff435ea1b60e2cefc0 ghcr.io/nguyentrungduc-cyber/fibonacci:latest-5ee7c6f	36317967
+k3s-worker3
+  ghcr.io/nguyentrungduc-cyber/fib-debian@sha256:4ac23326ce14d3e294241c4d906d6cb6856fa1a30bb2f089bdc7df52f1d0f862 ghcr.io/nguyentrungduc-cyber/fib-debian:latest-5ee7c6f	125049508
+  ghcr.io/nguyentrungduc-cyber/fibonacci@sha256:44517107ddf8d930654f84e1b0b9b5802fc7d6c0449fa9ff435ea1b60e2cefc0 ghcr.io/nguyentrungduc-cyber/fibonacci:latest-5ee7c6f	36317967
