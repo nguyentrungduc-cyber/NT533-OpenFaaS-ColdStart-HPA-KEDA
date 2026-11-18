@@ -42,3 +42,6 @@ Thumbs.db
 # ===== faas-cli (tự sinh khi build/pull template) =====
 functions/template/
 functions/build/
+
+# ===== Ket qua phan tich (sinh lai bang load-testing/analysis/analyze.py) =====
+load-testing/analysis/out/
