@@ -1,5 +1,8 @@
 # hpa-config.yaml — Cấu hình HPA dựa trên CPU cho function OpenFaaS
-# TODO (Người 3): tinh chỉnh ngưỡng sau khi có số liệu baseline.
+# Đích: fibonacci. Ngưỡng 50% của requests; requests của fibonacci = 350m (functions/stack.yml)
+# nên HPA scale khi pod dùng trên 175m CPU, tương đương khoảng 24 req/s mỗi pod
+# (C = 40 req/s, xem ../README.md). Không đổi ngưỡng sau khi bắt đầu đo chính thức.
+#
 #
 # KHÔNG dùng cùng lúc với KEDA ScaledObject cho cùng một function. Gỡ KEDA trước:
 #   kubectl delete -f ../keda/keda-scaledobject.yaml --ignore-not-found
@@ -20,13 +23,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: hello-world-hpa
+  name: fibonacci-hpa
   namespace: openfaas-fn
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: hello-world # TODO: khớp đúng tên Deployment OpenFaaS tạo ra
+    name: fibonacci # khớp tên Deployment OpenFaaS tạo ra
   minReplicas: 1
   maxReplicas: 5
   metrics:
@@ -35,4 +38,4 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 50 # TODO: tinh chỉnh sau khi có số liệu baseline
+          averageUtilization: 50
