@@ -29,7 +29,7 @@
 #   kubectl delete -f ../hpa/hpa-config.yaml --ignore-not-found
 #
 # Trước khi apply, kiểm tra giá trị nhãn function_name thật trong Prometheus
-# (thường có đuôi namespace, ví dụ hello-world.openfaas-fn):
+# (có đuôi namespace; của fibonacci đã đo: fibonacci.openfaas-fn):
 #   kubectl -n openfaas port-forward svc/prometheus 9090:9090 &
 #   curl -s 'http://localhost:9090/api/v1/query?query=gateway_function_invocation_total' | head -c 800
 #
@@ -38,7 +38,7 @@
 #
 # Kiểm tra:
 #   kubectl get scaledobject -n openfaas-fn
-#   kubectl describe scaledobject hello-world-keda -n openfaas-fn
+#   kubectl describe scaledobject fibonacci-keda -n openfaas-fn
 #
 # Trước khi so sánh HPA với KEDA, phải tắt bộ co giãn có sẵn của bản CE, nếu không
 # sẽ có ba cơ chế cùng điều khiển số pod:
@@ -48,11 +48,11 @@
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: hello-world-keda
+  name: fibonacci-keda
   namespace: openfaas-fn
 spec:
   scaleTargetRef:
-    name: hello-world           # khớp với tên Deployment OpenFaaS tạo ra
+    name: fibonacci             # khớp với tên Deployment OpenFaaS tạo ra
   minReplicaCount: 1            # bản CE không cho về 0, xem chú thích đầu file
   maxReplicaCount: 5
   cooldownPeriod: 30            # chỉ có tác dụng khi scale về 0; với min=1 thì HPA lo việc giảm pod, mặc định chờ 300 giây
@@ -61,15 +61,16 @@ spec:
     - type: prometheus
       metadata:
         serverAddress: http://prometheus.openfaas.svc.cluster.local:9090
-        # Đếm số request/s tới function hello-world trong 1 phút gần nhất
+        # Đếm số request/s tới function fibonacci trong 1 phút gần nhất
         query: >
           sum(
             rate(
-              gateway_function_invocation_total{function_name="hello-world.openfaas-fn"}[1m]
+              gateway_function_invocation_total{function_name="fibonacci.openfaas-fn"}[1m]
             )
           )
-        # Scale up khi RPS vượt ngưỡng này
-        # Tinh chỉnh sau khi có số liệu baseline từ load test
-        threshold: "10"
+        # Số req/s mỗi pod nên gánh; KEDA tăng pod khi tổng RPS / số pod vượt ngưỡng này.
+        # 24 = khoảng 60% của C = 40 req/s (docx: 50-70% của C), cũng là mức HPA 50% của
+        # requests 350m ứng với (xem ../README.md). Phải khớp với HPA để so sánh công bằng.
+        threshold: "24"
         # Ngưỡng bật 0 -> 1 pod; không có tác dụng vì minReplicaCount = 1
         activationThreshold: "0"

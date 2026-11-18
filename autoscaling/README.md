@@ -51,3 +51,15 @@ Tiêu chí chọn C: mức cao nhất mà p95 còn ở mức nền (khoảng 13 
 Từ mức 60 CPU pod chạm sát limit 500m, cùng lúc p95 và lỗi tăng: nút thắt là CPU limit của pod.
 Ở mức 80 k6 chạm trần 400 VU, tải thực gửi ra thấp hơn mức yêu cầu.
 Hạn chế: mới đo 1 lần; k6 chạy trên master nên cạnh tranh CPU với cụm.
+
+## Cấu hình so sánh HPA vs KEDA (fibonacci)
+
+Cả hai: min 1, max 5, đích là Deployment `fibonacci`, `requests` cpu 350m / `limits` cpu 500m (đề xuất ở PR #9).
+
+| | HPA (`hpa/hpa-config.yaml`) | KEDA (`keda/keda-scaledobject.yaml`) |
+|---|---|---|
+| Căn cứ | CPU trung bình 50% của requests (175m) | Tổng RPS từ Prometheus, `threshold` 24 req/s mỗi pod |
+| Tương đương | 175m CPU tương ứng khoảng 24 req/s mỗi pod (đo ở 20 req/s: ~159m; 30 req/s: ~208m) | 24 = khoảng 60% của C = 40 (docx: 50-70% của C) |
+| Giảm pod | Mặc định chờ 300 giây | Cùng cơ chế (KEDA tạo HPA bên dưới), `cooldownPeriod` không có tác dụng vì min = 1 |
+
+Lưu ý: số PR #9 phải được deploy trước khi đo. Chỉ gắn một trong hai cho fibonacci tại một thời điểm.
