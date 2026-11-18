@@ -127,9 +127,19 @@ def coldstart(files):
     data = {}
     for f in files:
         df = pd.read_csv(f, comment="#")
-        data[os.path.basename(f).split("-")[0]] = df["elapsed_ms"].iloc[1:]  # bo lan do dau
-    fig, ax = plt.subplots(figsize=(6, 4))
+        # Ten file do coldstart.sh ghi: <function>-YYYYMMDD-HHMMSS[...].csv. Bo phan ngay gio o CUOI,
+        # khong cat o dau gach ngang dau tien (data-transform se thanh "data").
+        stem = os.path.basename(f)
+        name = re.sub(r"-\d{8}-\d{6}.*$", "", stem)
+        if name == stem:  # ten file khong theo mau tren
+            name = os.path.splitext(stem)[0]
+        if name in data:  # hai lan do cung function: giu ca hai, khong ghi de
+            name = os.path.splitext(stem)[0]
+        data[name] = df["elapsed_ms"].iloc[1:]  # bo lan do dau
+    fig, ax = plt.subplots(figsize=(max(6, 2 * len(data)), 4))
     ax.boxplot(list(data.values()), tick_labels=list(data.keys()))
+    if max(len(k) for k in data) > 14:  # nhan dai thi xoay cho khoi chong len nhau
+        plt.setp(ax.get_xticklabels(), rotation=20, ha="right")
     ax.set_ylabel("cold-start (ms)")
     ax.set_title("Cold-start (bo lan do dau)")
     fig.tight_layout()
