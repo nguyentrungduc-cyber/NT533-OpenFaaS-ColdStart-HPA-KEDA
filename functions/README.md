@@ -12,6 +12,7 @@ serverless functions minh họa, cấu hình scale-to-zero.
 | `hello-world` | Function demo tối thiểu, test nhanh gateway, baseline đo cold-start | `hello-world/hello-world.yml` | ✅ Code sẵn sàng |
 | `hello-py` | Function demo trả về chuỗi cố định | `stack.yml` | ✅ Code sẵn sàng |
 | `fibonacci` | Tạo tải CPU điều chỉnh được, dùng thử HPA vs KEDA | `stack.yml` | ✅ Code sẵn sàng |
+| `fib-debian` | Cùng mã nguồn `fibonacci`, image nền Debian (template `python3-http-debian`) thay vì Alpine; chỉ dùng cho TN2 | `stack.yml` | ✅ Khai báo xong |
 | `text-sentiment` | Phân tích cảm xúc văn bản, function nhẹ để đo throughput | `stack.yml` | ✅ Code sẵn sàng |
 | `notify` | Mô phỏng gửi thông báo (chỉ ghi log, không gửi email thật) | `stack.yml` | ✅ Code sẵn sàng |
 | `image-resize` | Resize ảnh bằng Pillow, image lớn, tốn CPU (TN2, TN3) | `stack.yml` | ✅ Code sẵn sàng |
