@@ -45,8 +45,10 @@ functions:
     image: ghcr.io/nguyentrungduc-cyber/fib-debian:latest
     build_args:
       PYTHON_VERSION: "3.12"
+    # TN2 chỉ được khác fibonacci ở image nền, nên requests/limits phải giống hệt
+    # fibonacci. Đổi requests của fibonacci thì đổi luôn ở đây.
     requests:
-      cpu: 100m
+      cpu: 350m
       memory: 64Mi
     limits:
       cpu: 500m
