@@ -6,6 +6,8 @@ Du lieu vao, trong load-testing/results/hpa-vs-keda/, moi lan do co 3 file cung 
   .csv           do record-replicas.sh ghi (ts_ms,ready,desired)
   .start         moc bat dau tai (date +%s%3N, ghi ngay truoc khi chay k6)
   .summary.json  do k6 --summary-export (can --summary-trend-stats co p(99))
+  .cpu.csv       (tuy chon) do record-cpu.sh ghi (ts_ms,cpu_pct_avg) -> cot cpu_pct_avg
+Moc "tai bat dau tang" va "het tai" cua tung kich ban nam o bang MARKS ben duoi.
 
 Dung:
   python analyze.py hpa-vs-keda [thu_muc_ket_qua]        -> bang so lieu + hinh trong analysis/out/
@@ -28,8 +30,24 @@ OUT = os.path.join(HERE, "out")
 COLORS = {"hpa": "tab:blue", "keda": "tab:orange"}
 
 
-def metric(summary, name, key):
-    m = summary["metrics"][name]
+# Moc thoi gian (giay tu luc bat dau tai) theo hpa-vs-keda.js: jump = luc tai bat dau vuot muc nen,
+# load_off = luc tai ha xuong muc nen lan cuoi (tu day moi tinh thoi gian giam pod).
+# Phai sua cung luc voi stages trong k6-scripts/hpa-vs-keda.js.
+MARKS = {
+    "steady": {"jump": 0, "load_off": 270},   # 30s len + 4m giu
+    "ramp":   {"jump": 0, "load_off": 300},   # 4m len + 1m giu
+    "spike":  {"jump": 60, "load_off": 200},  # nen 1m, nhay 10s, giu 2m, ha 10s (con 1m nen)
+    "step":   {"jump": 60, "load_off": 255},  # nen 1m, bac 2C, 3C, 4C; het la het tai
+    "burst":  {"jump": 0, "load_off": 135},   # dot 1 ngay tu dau; load_off = het dot 2
+}
+
+
+def metric(summary, name, key, default=None):
+    m = summary["metrics"].get(name)
+    if m is None:  # k6 bo han metric neu chua tung xay ra (vd dropped_iterations = 0)
+        if default is None:
+            raise KeyError(name)
+        return default
     return m.get("values", m)[key]  # k6 ban cu co "values", ban moi khong
 
 
@@ -43,25 +61,39 @@ def load_run(base):
     return df
 
 
-def analyze_run(base, df, window):
+def cpu_mean(base, window):
+    """CPU trung binh cua cum (%) trong [0, window] tu file <base>.cpu.csv do record-cpu.sh ghi; NaN neu khong co."""
+    path = base + ".cpu.csv"
+    if not os.path.exists(path):
+        return float("nan")
+    c = pd.read_csv(path)
+    c["cpu_pct_avg"] = pd.to_numeric(c["cpu_pct_avg"], errors="coerce")
+    c["t"] = (c["ts_ms"] - int(open(base + ".start").read().strip())) / 1000.0
+    return c[(c["t"] >= 0) & (c["t"] <= window)]["cpu_pct_avg"].mean()
+
+
+def analyze_run(base, df, window, profile):
     """Tinh cac chi so cho mot lan do. Chi xet [0, window] giay de cac lan do so sanh duoc voi nhau."""
+    jump, load_off = MARKS[profile]["jump"], MARKS[profile]["load_off"]
     before, after = df[df["t"] < 0], df[(df["t"] >= 0) & (df["t"] <= window)]
-    start_desired = before["desired"].iloc[-1] if len(before) else after["desired"].iloc[0]
-    up = after[after["desired"] > start_desired]
+    at_jump = df[df["t"] < jump]
+    start_desired = at_jump["desired"].iloc[-1] if len(at_jump) else after["desired"].iloc[0]
+    up = after[(after["t"] >= jump) & (after["desired"] > start_desired)]
     peak = after["ready"].max()
     base_ready = before["ready"].iloc[-1] if len(before) else after["ready"].iloc[0]
-    last_peak = after[after["ready"] >= peak]["t"].iloc[-1]
-    down = after[(after["t"] > last_peak) & (after["ready"] <= base_ready)]
+    down = after[(after["t"] > load_off) & (after["ready"] <= base_ready)]
     s = json.load(open(base + ".summary.json"))
     return {
-        "react_s": up["t"].iloc[0] if len(up) else float("nan"),  # tai tang -> desired tang lan dau
-        "full_s": after[after["ready"] >= peak]["t"].iloc[0],     # tai tang -> ready dat muc cao nhat
+        "react_s": up["t"].iloc[0] - jump if len(up) else float("nan"),         # tai tang -> desired tang lan dau
+        "full_s": after[after["ready"] >= peak]["t"].iloc[0] - jump,            # tai tang -> ready dat muc cao nhat
         "peak_ready": peak,
-        "scale_down_s": down["t"].iloc[0] - last_peak if len(down) else float("nan"),  # tu luc dinh -> ve muc ban dau
+        "scale_down_s": down["t"].iloc[0] - load_off if len(down) else float("nan"),  # het tai -> ve muc ban dau
         "pod_seconds": (after["ready"] * after["t"].diff().fillna(0)).sum(),  # chi phi tai nguyen
+        "cpu_pct_avg": cpu_mean(base, window),                                   # CPU TB cua cum (%)
         "p95_ms": metric(s, "http_req_duration", "p(95)"),
         "p99_ms": metric(s, "http_req_duration", "p(99)"),
         "error_rate": metric(s, "http_req_failed", "value"),
+        "dropped": metric(s, "dropped_iterations", "count", 0),  # request k6 khong kip gui: so lieu tai that thap hon ke hoach
     }
 
 
@@ -71,7 +103,7 @@ def hpa_vs_keda(folder):
     for csv in sorted(glob.glob(os.path.join(folder, "*_run*.csv"))):
         base = csv[:-4]
         m = re.match(r"(hpa|keda)_(\w+)_run(\d+)$", os.path.basename(base))
-        if not m:
+        if not m or m.group(2) not in MARKS:
             continue
         try:
             df = load_run(base)
@@ -86,7 +118,7 @@ def hpa_vs_keda(folder):
         window[profile] = min(window.get(profile, float("inf")), df["t"].max())
     rows, series = [], {}
     for (tool, profile, run), (base, df) in runs.items():
-        rows.append({"tool": tool, "profile": profile, "run": run, **analyze_run(base, df, window[profile])})
+        rows.append({"tool": tool, "profile": profile, "run": run, **analyze_run(base, df, window[profile], profile)})
         series[(tool, profile, run)] = df
     for profile, w in window.items():
         print(f"kich ban {profile}: cua so so sanh = {w:.0f} giay (lan ghi ngan nhat)")

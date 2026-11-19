@@ -8,9 +8,9 @@
 #   KEDA chỉ tự quyết việc chuyển 0 <-> 1 pod. Từ 1 đến N pod, việc tăng/giảm do HPA
 #   mà KEDA tạo ra (keda-hpa-<tên>) đảm nhận. Vì minReplicaCount = 1 nên:
 #   - cooldownPeriod KHÔNG có tác dụng (nó chỉ áp dụng khi scale về 0).
-#   - Giảm pod theo stabilization window mặc định của HPA: 300 giây, y như HPA thuần.
-#     Muốn đổi thì đặt advanced.horizontalPodAutoscalerConfig.behavior.scaleDown,
-#     và nếu đổi thì phải đổi giống hệt cho HPA thuần để so sánh công bằng.
+#   - Giảm pod theo stabilization window của HPA, ở đây đặt tường minh 300 giây
+#     (advanced.horizontalPodAutoscalerConfig.behavior.scaleDown, KEDA truyền thẳng vào HPA),
+#     giống hệt hpa-config.yaml. Nếu đổi thì phải đổi cả hai để so sánh công bằng.
 #   - HPA hỏi metric theo chu kỳ của kube-controller-manager (mặc định 15 giây),
 #     nên pollingInterval nhỏ hơn không làm KEDA phản ứng nhanh hơn ở dải 1..N.
 #
@@ -55,13 +55,21 @@ spec:
     name: fibonacci             # khớp với tên Deployment OpenFaaS tạo ra
   minReplicaCount: 1            # bản CE không cho về 0, xem chú thích đầu file
   maxReplicaCount: 5
-  cooldownPeriod: 30            # chỉ có tác dụng khi scale về 0; với min=1 thì HPA lo việc giảm pod, mặc định chờ 300 giây
-  pollingInterval: 15           # chu kỳ KEDA poll Prometheus; ở dải 1..N, HPA vẫn hỏi metric mỗi 15 giây
+  cooldownPeriod: 30            # chỉ có tác dụng khi scale về 0; với min=1 thì HPA lo việc giảm pod (behavior bên dưới)
+  pollingInterval: 15           # chu kỳ KEDA poll Prometheus (mặc định của KEDA là 30 giây); ở dải 1..N, HPA vẫn hỏi metric mỗi 15 giây
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: 300   # giống hpa-config.yaml
   triggers:
     - type: prometheus
       metadata:
         serverAddress: http://prometheus.openfaas.svc.cluster.local:9090
-        # Đếm số request/s tới function fibonacci trong 1 phút gần nhất
+        # Đếm số request/s tới function fibonacci trong 1 phút gần nhất.
+        # Chọn cửa sổ [1m] vì Prometheus scrape mỗi 15 giây (cấu hình trong repo): [1m] có 4 mẫu,
+        # [30s] chỉ có 2 mẫu nên dễ nhiễu hoặc trống. Cái giá: rate() trung bình theo cửa sổ nên
+        # KEDA thấy tải tăng chậm hơn (độ trễ do cấu hình query này, không phải đặc tính của KEDA).
         query: >
           sum(
             rate(

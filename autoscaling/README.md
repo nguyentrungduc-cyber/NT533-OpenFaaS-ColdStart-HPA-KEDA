@@ -60,6 +60,13 @@ Cả hai: min 1, max 5, đích là Deployment `fibonacci`, `requests` cpu 350m /
 |---|---|---|
 | Căn cứ | CPU trung bình 50% của requests (175m) | Tổng RPS từ Prometheus, `threshold` 24 req/s mỗi pod |
 | Tương đương | 175m CPU tương ứng khoảng 24 req/s mỗi pod (đo ở 20 req/s: ~159m; 30 req/s: ~208m) | 24 = khoảng 60% của C = 40 (docx: 50-70% của C) |
-| Giảm pod | Mặc định chờ 300 giây | Cùng cơ chế (KEDA tạo HPA bên dưới), `cooldownPeriod` không có tác dụng vì min = 1 |
+| Giảm pod | `behavior.scaleDown.stabilizationWindowSeconds: 300`, đặt tường minh | Cùng giá trị 300 qua `advanced.horizontalPodAutoscalerConfig.behavior` (KEDA tạo HPA bên dưới), `cooldownPeriod` không có tác dụng vì min = 1 |
+| Cửa sổ đo tải | metrics-server, cập nhật theo cửa sổ khoảng 15 giây | `rate(...[1m])` trên Prometheus (scrape 15 giây); `[1m]` có 4 mẫu, `[30s]` chỉ 2 mẫu nên không dùng |
 
 Lưu ý: số PR #9 phải được deploy trước khi đo. Chỉ gắn một trong hai cho fibonacci tại một thời điểm.
+
+Theo tài liệu KEDA 2.16: `pollingInterval` mặc định 30 giây, `cooldownPeriod` chỉ áp dụng khi scale về 0,
+`activationThreshold` bị bỏ qua khi `minReplicaCount` ≥ 1. Tài liệu KEDA không nói về độ trễ do cửa sổ `rate()`.
+
+**Mức nền của kịch bản spike và step là 0,5C = 20 req/s** (docx dùng C = 40). Ở 40 req/s pod đã vượt ngưỡng
+scale (~24 req/s) nên hệ thống lên 2 pod trước khi tải tăng; 20 req/s (~159m CPU) dưới ngưỡng HPA 175m nên bắt đầu từ đúng 1 pod.

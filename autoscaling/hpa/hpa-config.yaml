@@ -32,6 +32,11 @@ spec:
     name: fibonacci # khớp tên Deployment OpenFaaS tạo ra
   minReplicas: 1
   maxReplicas: 5
+  behavior:
+    scaleDown:
+      # Đặt tường minh (bằng mặc định của Kubernetes) để KEDA và HPA giống hệt nhau và con số
+      # trong báo cáo là con số ta tự đặt. Phải giống keda-scaledobject.yaml.
+      stabilizationWindowSeconds: 300
   metrics:
     - type: Resource
       resource:
