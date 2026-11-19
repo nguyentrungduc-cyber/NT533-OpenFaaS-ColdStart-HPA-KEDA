@@ -1,0 +1,1 @@
+# function=fibonacci image=ghcr.io/nguyentrungduc-cyber/fibonacci:latest-5ee7c6f policy=IfNotPresent commit=ea92143 runs=2
