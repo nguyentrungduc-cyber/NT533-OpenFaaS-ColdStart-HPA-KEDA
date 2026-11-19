@@ -47,6 +47,8 @@ Script: `k6-scripts/hpa-vs-keda.js` (chọn kịch bản bằng `PROFILE`: stead
 - Image fibonacci có sẵn trên cả 4 node (ghcr.io từ VM không ổn định, từng làm pod thứ 5 trễ ~104 giây). Kéo trước bằng
   `kubectl -n openfaas-fn scale deploy fibonacci --replicas=5`, chờ 5 pod Ready, rồi `--replicas=1`.
 - Bộ co giãn của CE đã tắt (không còn Alertmanager); báo nhóm không tạo tải lên cụm trong lúc đo.
+- Sau khi gateway khởi động lại, gọi fibonacci vài lần (`curl -X POST -d 20000 $GATEWAY/function/fibonacci`) để series Prometheus
+  đã tồn tại; nếu không, `rate()` bỏ qua phần tăng của lần xuất hiện đầu tiên và KEDA có thể thấy 0 req/s lúc đầu.
 - Chạy recorder và k6 trong `tmux` trên master (`tmux new -s do`; thoát bằng Ctrl+B rồi D; vào lại `tmux attach -t do`),
   vì tắt SSH sẽ dừng đo.
 

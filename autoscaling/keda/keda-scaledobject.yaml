@@ -66,14 +66,15 @@ spec:
     - type: prometheus
       metadata:
         serverAddress: http://prometheus.openfaas.svc.cluster.local:9090
-        # Đếm số request/s tới function fibonacci trong 1 phút gần nhất.
-        # Chọn cửa sổ [1m] vì Prometheus scrape mỗi 15 giây (cấu hình trong repo): [1m] có 4 mẫu,
-        # [30s] chỉ có 2 mẫu nên dễ nhiễu hoặc trống. Cái giá: rate() trung bình theo cửa sổ nên
-        # KEDA thấy tải tăng chậm hơn (độ trễ do cấu hình query này, không phải đặc tính của KEDA).
+        # Đếm số request/s tới function fibonacci trong 30 giây gần nhất.
+        # Chọn cửa sổ [30s] (docx ghi [30s]). Prometheus scrape gateway mỗi 5 giây (job openfaas-pods,
+        # đo trên cụm ngày 19/11): [30s] có 6 mẫu. Cái giá: rate() trung bình theo cửa sổ nên KEDA thấy
+        # tải tăng chậm hơn tải thật (độ trễ do cấu hình query này, không phải đặc tính của KEDA).
+        # Series chỉ có từ lần gọi đầu tiên sau khi gateway khởi động: gọi vài lần trước khi đo.
         query: >
           sum(
             rate(
-              gateway_function_invocation_total{function_name="fibonacci.openfaas-fn"}[1m]
+              gateway_function_invocation_total{function_name="fibonacci.openfaas-fn"}[30s]
             )
           )
         # Số req/s mỗi pod nên gánh; KEDA tăng pod khi tổng RPS / số pod vượt ngưỡng này.
