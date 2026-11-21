@@ -1,0 +1,337 @@
+{
+  "date": "2026-11-21",
+  "scope": "Basic OpenFaaS dashboard configuration and import checks; not full monitoring acceptance or performance results",
+  "export": {
+    "path": "grafana/dashboards/openfaas-overview.json",
+    "sha256": "d91fe00e4b684f6cfbf3a01f1f198d5b1f0d206f077a863184cbb7ea66520ff3",
+    "matches_verified_panel_configuration": true
+  },
+  "deployment": {
+    "uid": "addhncs",
+    "title": "NT533 — OpenFaaS Overview",
+    "server_version": 4,
+    "existing_panels_preserved": true,
+    "panel_count": 6
+  },
+  "panels": [
+    {
+      "id": 3,
+      "title": "Latency phía gateway — p50/p95/p99",
+      "unit": "s",
+      "query_count": 3
+    },
+    {
+      "id": 2,
+      "title": "Replica theo gateway",
+      "unit": "short",
+      "query_count": 1
+    },
+    {
+      "id": 1,
+      "title": "Request/s theo function",
+      "unit": "reqps",
+      "query_count": 1
+    },
+    {
+      "id": 4,
+      "title": "Request thành công/s",
+      "unit": "reqps",
+      "query_count": 1
+    },
+    {
+      "id": 5,
+      "title": "Tỷ lệ lỗi HTTP",
+      "unit": "percentunit",
+      "query_count": 1
+    },
+    {
+      "id": 6,
+      "title": "Trạng thái scrape",
+      "unit": "short",
+      "query_count": 1
+    }
+  ],
+  "import": {
+    "uid": "nt533-import-test",
+    "result": "import_verified",
+    "comparisons": [
+      {
+        "panel": "Latency phía gateway — p50/p95/p99",
+        "configuration_matches_main": true
+      },
+      {
+        "panel": "Replica theo gateway",
+        "configuration_matches_main": true
+      },
+      {
+        "panel": "Request/s theo function",
+        "configuration_matches_main": true
+      },
+      {
+        "panel": "Request thành công/s",
+        "configuration_matches_main": true
+      },
+      {
+        "panel": "Tỷ lệ lỗi HTTP",
+        "configuration_matches_main": true
+      },
+      {
+        "panel": "Trạng thái scrape",
+        "configuration_matches_main": true
+      }
+    ],
+    "variable_matches_main": true,
+    "query_checks": [
+      {
+        "panel": "Latency phía gateway — p50/p95/p99",
+        "refId": "A",
+        "selection": "All",
+        "status": "success",
+        "series_count": 0
+      },
+      {
+        "panel": "Latency phía gateway — p50/p95/p99",
+        "refId": "A",
+        "selection": "fibonacci",
+        "status": "success",
+        "series_count": 0
+      },
+      {
+        "panel": "Latency phía gateway — p50/p95/p99",
+        "refId": "B",
+        "selection": "All",
+        "status": "success",
+        "series_count": 0
+      },
+      {
+        "panel": "Latency phía gateway — p50/p95/p99",
+        "refId": "B",
+        "selection": "fibonacci",
+        "status": "success",
+        "series_count": 0
+      },
+      {
+        "panel": "Latency phía gateway — p50/p95/p99",
+        "refId": "C",
+        "selection": "All",
+        "status": "success",
+        "series_count": 0
+      },
+      {
+        "panel": "Latency phía gateway — p50/p95/p99",
+        "refId": "C",
+        "selection": "fibonacci",
+        "status": "success",
+        "series_count": 0
+      },
+      {
+        "panel": "Replica theo gateway",
+        "refId": "A",
+        "selection": "All",
+        "status": "success",
+        "series_count": 7
+      },
+      {
+        "panel": "Replica theo gateway",
+        "refId": "A",
+        "selection": "fibonacci",
+        "status": "success",
+        "series_count": 1
+      },
+      {
+        "panel": "Request/s theo function",
+        "refId": "A",
+        "selection": "All",
+        "status": "success",
+        "series_count": 0
+      },
+      {
+        "panel": "Request/s theo function",
+        "refId": "A",
+        "selection": "fibonacci",
+        "status": "success",
+        "series_count": 0
+      },
+      {
+        "panel": "Request thành công/s",
+        "refId": "A",
+        "selection": "All",
+        "status": "success",
+        "series_count": 0
+      },
+      {
+        "panel": "Request thành công/s",
+        "refId": "A",
+        "selection": "fibonacci",
+        "status": "success",
+        "series_count": 0
+      },
+      {
+        "panel": "Tỷ lệ lỗi HTTP",
+        "refId": "A",
+        "selection": "All",
+        "status": "success",
+        "series_count": 0
+      },
+      {
+        "panel": "Tỷ lệ lỗi HTTP",
+        "refId": "A",
+        "selection": "fibonacci",
+        "status": "success",
+        "series_count": 0
+      },
+      {
+        "panel": "Trạng thái scrape",
+        "refId": "A",
+        "selection": "All",
+        "status": "success",
+        "series_count": 2
+      },
+      {
+        "panel": "Trạng thái scrape",
+        "refId": "A",
+        "selection": "fibonacci",
+        "status": "success",
+        "series_count": 2
+      }
+    ]
+  },
+  "ui": {
+    "dashboard_uid": "nt533-import-test",
+    "method": "Observed native Chrome UI through CUA, without saving dashboard configuration",
+    "time_range": "Last 30 minutes",
+    "checks": [
+      {
+        "selection": [
+          "All"
+        ],
+        "observed": "Function dropdown populated; replica panel displayed multiple functions",
+        "result": "observed"
+      },
+      {
+        "selection": [
+          "fibonacci.openfaas-fn"
+        ],
+        "observed": "URL selection changed; replica legend only fibonacci",
+        "result": "observed"
+      },
+      {
+        "selection": [
+          "fibonacci.openfaas-fn",
+          "hello-py.openfaas-fn"
+        ],
+        "observed": "Both selected values in URL and replica legend",
+        "result": "observed"
+      },
+      {
+        "selection": [
+          "fibonacci.openfaas-fn",
+          "hello-py.openfaas-fn"
+        ],
+        "observed": "Scrape panel still displayed openfaas-pods and prometheus targets at 1",
+        "result": "observed"
+      }
+    ],
+    "request_latency_panels": "No data in viewed time range; not validated under controlled load",
+    "load_generated": false,
+    "dashboard_configuration_saved": false,
+    "limits": [
+      "No controlled traffic or error injection",
+      "No node Ready/desired/available replica verification",
+      "No screenshot files exported; observations are recorded from tool state and displayed screenshots"
+    ]
+  },
+  "historical_range_checks": [
+    {
+      "panel": "Request thành công/s",
+      "selection": "All",
+      "range_seconds": 1800,
+      "status": "success",
+      "series_count": 1,
+      "finite_samples": 10
+    },
+    {
+      "panel": "Tỷ lệ lỗi HTTP",
+      "selection": "All",
+      "range_seconds": 1800,
+      "status": "success",
+      "series_count": 1,
+      "finite_samples": 0
+    },
+    {
+      "panel": "Trạng thái scrape",
+      "selection": "All",
+      "range_seconds": 1800,
+      "status": "success",
+      "series_count": 3,
+      "finite_samples": 158
+    }
+  ],
+  "historical_environment": {
+    "grafana_version": "12.3.1",
+    "targets": [
+      {
+        "job": "openfaas-pods",
+        "health": "up",
+        "scrape_interval": "5s"
+      },
+      {
+        "job": "prometheus",
+        "health": "up",
+        "scrape_interval": "10s"
+      }
+    ],
+    "empty_metric_checks": [
+      "node_cpu",
+      "node_memory",
+      "pod_cpu",
+      "pod_memory",
+      "desired_replicas",
+      "available_replicas",
+      "ready_nodes"
+    ]
+  },
+  "latest_connectivity_attempt": {
+    "checked_at": "2026-11-21T09:40:28+07:00",
+    "outcome": "blocked_by_network_connectivity",
+    "metrics_checked": false,
+    "tcp_checks": [
+      {
+        "port": 31782,
+        "result": "timeout"
+      },
+      {
+        "port": 31112,
+        "result": "timeout"
+      }
+    ]
+  },
+  "pending": [
+    "Controlled load verification of RPS, error ratio and gateway latency",
+    "CPU/RAM data sources for nodes and pods",
+    "Kubernetes desired/Ready replica and node status",
+    "Current scrape state after network access is restored"
+  ],
+  "provenance": [
+    {
+      "file": "dashboard-additional-panels-review.json",
+      "sha256": "8d2822e0756fdb06944fb83b2b18ab40cc7447b58db0d19651d7e5aebd8b4136"
+    },
+    {
+      "file": "dashboard-import-review.json",
+      "sha256": "006ced301f540bc956d1cd77287abf1456c8a112e0d593924759ad509720ae33"
+    },
+    {
+      "file": "dashboard-ui-review.json",
+      "sha256": "18f67229ba839acf9dfebb712508206b814b90d2301657255e8cbbe206805a2e"
+    },
+    {
+      "file": "self-check-2026-11-21.json",
+      "sha256": "4c7775f5e79eca6fd81e1558ad4381edb17e9438e2050e9687638b7d05a09d9a"
+    },
+    {
+      "file": "monitoring-recheck.json",
+      "sha256": "b36bf5ac40109d4e0c54a8b90cf92b30a04c22c0d90c6e56fe4f295389f8ec33"
+    }
+  ]
+}
