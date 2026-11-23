@@ -1,0 +1,236 @@
+{
+  "checked_at": "2026-11-23 (UTC+7)",
+  "grafana": "12.3.1",
+  "dashboard_uid": "addhncs",
+  "dashboard_version": 6,
+  "changes_v5": [
+    "panel 7: metric điều khiển KEDA RPS[30s] và RPS[30s]/pod, ngưỡng 24",
+    "panel 8: stat replica phân biệt 0 pod và không có dữ liệu; panel 2 thêm noValue",
+    "row 20 (thu gọn): CPU/RAM node, CPU/RAM pod, desired/Ready, Node Ready — chờ nguồn metrics",
+    "annotation query tag nt533; 6 annotation TN5 = cửa sổ recorder replicas, không phải mốc bắt đầu tải"
+  ],
+  "scrape_jobs_live": [
+    "openfaas-pods (5s)",
+    "prometheus (10s)"
+  ],
+  "resource_k8s_series": "0 series node_*, container_*, kube_*, keda_* — chưa có node-exporter/cAdvisor/kube-state-metrics",
+  "prometheus_retention": "15d",
+  "import_test": {
+    "uid": "nt533-import-test",
+    "panels_targets_fieldconfig_match": true,
+    "annotations_match": true,
+    "version_checked": 6
+  },
+  "tn5_cross_check": {
+    "method": "increase(gateway_function_invocation_total{function_name=\"fibonacci.openfaas-fn\"}) theo mã HTTP trên cửa sổ recorder + 60s; max gateway_service_count; so với k6 summary và recorder replicas. increase() có ngoại suy nên lệch nhỏ là kỳ vọng.",
+    "runs": [
+      {
+        "run": "hpa_spike_run1",
+        "window_utc_ms": [
+          "1795221723813",
+          "1795222125662"
+        ],
+        "k6_http_reqs": 20920,
+        "k6_failed": 7291,
+        "k6_dropped_iterations": 1909,
+        "gateway_requests_by_code": {
+          "200": 13676,
+          "502": 7246
+        },
+        "gateway_total": 20922,
+        "gateway_non2xx": 7246,
+        "gateway_vs_k6_ratio": 1.0,
+        "k6_failed_minus_gateway_non2xx": 45,
+        "peak_rps_30s_gateway": 160.6,
+        "recorder_max_ready": 5,
+        "recorder_max_desired": 5,
+        "gateway_replica_max": 5.0,
+        "gateway_replica_points": 93
+      },
+      {
+        "run": "hpa_spike_run2",
+        "window_utc_ms": [
+          "1795222709048",
+          "1795223637242"
+        ],
+        "k6_http_reqs": 19171,
+        "k6_failed": 7735,
+        "k6_dropped_iterations": 3658,
+        "gateway_requests_by_code": {
+          "200": 11471,
+          "502": 7759
+        },
+        "gateway_total": 19230,
+        "gateway_non2xx": 7759,
+        "gateway_vs_k6_ratio": 1.003,
+        "k6_failed_minus_gateway_non2xx": -24,
+        "peak_rps_30s_gateway": 162.0,
+        "recorder_max_ready": 4,
+        "recorder_max_desired": 4,
+        "gateway_replica_max": 4.0,
+        "gateway_replica_points": 198
+      },
+      {
+        "run": "hpa_spike_run3",
+        "window_utc_ms": [
+          "1795223666608",
+          "1795224524514"
+        ],
+        "k6_http_reqs": 18767,
+        "k6_failed": 7512,
+        "k6_dropped_iterations": 4062,
+        "gateway_requests_by_code": {
+          "200": 11280,
+          "502": 7528
+        },
+        "gateway_total": 18808,
+        "gateway_non2xx": 7528,
+        "gateway_vs_k6_ratio": 1.002,
+        "k6_failed_minus_gateway_non2xx": -16,
+        "peak_rps_30s_gateway": 142.4,
+        "recorder_max_ready": 4,
+        "recorder_max_desired": 4,
+        "gateway_replica_max": 4.0,
+        "gateway_replica_points": 184
+      },
+      {
+        "run": "keda_spike_run1",
+        "window_utc_ms": [
+          "1795224726645",
+          "1795225050680"
+        ],
+        "k6_http_reqs": 20121,
+        "k6_failed": 7801,
+        "k6_dropped_iterations": 2708,
+        "gateway_requests_by_code": {
+          "200": 12450,
+          "502": 7883
+        },
+        "gateway_total": 20333,
+        "gateway_non2xx": 7883,
+        "gateway_vs_k6_ratio": 1.011,
+        "k6_failed_minus_gateway_non2xx": -82,
+        "peak_rps_30s_gateway": 149.0,
+        "recorder_max_ready": 5,
+        "recorder_max_desired": 5,
+        "gateway_replica_max": 5.0,
+        "gateway_replica_points": 77
+      },
+      {
+        "run": "keda_spike_run2",
+        "window_utc_ms": [
+          "1795225373289",
+          "1795225686177"
+        ],
+        "k6_http_reqs": 21000,
+        "k6_failed": 7793,
+        "k6_dropped_iterations": 1829,
+        "gateway_requests_by_code": {
+          "200": 13278,
+          "502": 7835
+        },
+        "gateway_total": 21113,
+        "gateway_non2xx": 7835,
+        "gateway_vs_k6_ratio": 1.005,
+        "k6_failed_minus_gateway_non2xx": -42,
+        "peak_rps_30s_gateway": 152.9,
+        "recorder_max_ready": 5,
+        "recorder_max_desired": 5,
+        "gateway_replica_max": 5.0,
+        "gateway_replica_points": 75
+      },
+      {
+        "run": "keda_spike_run3",
+        "window_utc_ms": [
+          "1795226111544",
+          "1795226576046"
+        ],
+        "k6_http_reqs": 21366,
+        "k6_failed": 7692,
+        "k6_dropped_iterations": 1463,
+        "gateway_requests_by_code": {
+          "200": 13779,
+          "502": 7751
+        },
+        "gateway_total": 21530,
+        "gateway_non2xx": 7751,
+        "gateway_vs_k6_ratio": 1.008,
+        "k6_failed_minus_gateway_non2xx": -59,
+        "peak_rps_30s_gateway": 153.4,
+        "recorder_max_ready": 5,
+        "recorder_max_desired": 5,
+        "gateway_replica_max": 5.0,
+        "gateway_replica_points": 105
+      }
+    ]
+  },
+  "changes_v6": [
+    "panel 9: Request lỗi/s theo function và mã HTTP (bắt buộc theo kế hoạch Người 4)",
+    "refresh 5s, khoảng mặc định 15 phút"
+  ],
+  "tn5_errors_after_max_replica": {
+    "method": "Counter gateway_function_invocation_total (code 502/200) lấy mẫu 5s qua Prometheus, chia tại lần đầu max(gateway_service_count) đạt giá trị lớn nhất trong cửa sổ replicas ±30s. Độ phân giải 5s.",
+    "runs": [
+      {
+        "run": "hpa_spike_run1",
+        "replica_max": 5.0,
+        "first_502_before_max_s": 50.0,
+        "err_502_before_max": 2591,
+        "err_502_after_max": 4565,
+        "share_after_max": 0.638,
+        "ok_after_max": 6050,
+        "failed_rate_after_max": 0.43
+      },
+      {
+        "run": "hpa_spike_run2",
+        "replica_max": 4.0,
+        "first_502_before_max_s": 45.0,
+        "err_502_before_max": 2456,
+        "err_502_after_max": 5279,
+        "share_after_max": 0.682,
+        "ok_after_max": 4744,
+        "failed_rate_after_max": 0.527
+      },
+      {
+        "run": "hpa_spike_run3",
+        "replica_max": 4.0,
+        "first_502_before_max_s": 45.0,
+        "err_502_before_max": 2027,
+        "err_502_after_max": 5485,
+        "share_after_max": 0.73,
+        "ok_after_max": 4957,
+        "failed_rate_after_max": 0.525
+      },
+      {
+        "run": "keda_spike_run1",
+        "replica_max": 5.0,
+        "first_502_before_max_s": 30.0,
+        "err_502_before_max": 1767,
+        "err_502_after_max": 6034,
+        "share_after_max": 0.773,
+        "ok_after_max": 8000,
+        "failed_rate_after_max": 0.43
+      },
+      {
+        "run": "keda_spike_run2",
+        "replica_max": 5.0,
+        "first_502_before_max_s": 15.0,
+        "err_502_before_max": 974,
+        "err_502_after_max": 6819,
+        "share_after_max": 0.875,
+        "ok_after_max": 9438,
+        "failed_rate_after_max": 0.419
+      },
+      {
+        "run": "keda_spike_run3",
+        "replica_max": 5.0,
+        "first_502_before_max_s": 10.0,
+        "err_502_before_max": 659,
+        "err_502_after_max": 7033,
+        "share_after_max": 0.914,
+        "ok_after_max": 10000,
+        "failed_rate_after_max": 0.413
+      }
+    ]
+  }
+}
