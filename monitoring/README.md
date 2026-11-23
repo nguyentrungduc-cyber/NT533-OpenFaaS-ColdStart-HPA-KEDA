@@ -81,7 +81,7 @@ Tỷ lệ lỗi có fallback 0 ở tử số khi counter tổng tồn tại và 
 
 ## Nền tảng và việc còn lại
 
-Trung Đức đã cài Prometheus đi kèm OpenFaaS (namespace `openfaas`) và Grafana (namespace `monitoring`, NodePort `31782`). Datasource nội bộ: `http://prometheus.openfaas:9090`. Tại lần kiểm kê: global scrape 15s, gateway 5s, Prometheus self-scrape 10s. Thông tin đăng nhập không lưu trong thư mục này.
+Trung Đức đã cài Prometheus đi kèm OpenFaaS (namespace `openfaas`) và Grafana bằng Helm chart `grafana/grafana` (namespace `monitoring`, NodePort `31782`). Datasource nội bộ: `http://prometheus.openfaas:9090`. Tại lần kiểm kê: global scrape 15s, gateway 5s, Prometheus self-scrape 10s. Thông tin đăng nhập không lưu trong thư mục này.
 
 Huy tạo ba panel đầu và biến function theo hướng dẫn; phần hỗ trợ bổ sung ba panel, rà API, export/import và ghi minh chứng. Phần nền tảng đã có được tiếp nhận, không cài lại.
 

@@ -9,7 +9,7 @@
 | 5-6 | Cài k3s cluster (1 control-plane + 3 worker), kiểm tra kết nối, cài metrics-server | Người 1 | ✅ Đã xong |
 | 7-8 | Cài OpenFaaS trên cluster, viết & deploy function demo, cấu hình scale-to-zero | Người 2 (Người 1 đã cài nền trước) | ✅ OpenFaaS + KEDA cài sẵn; đã có code 5 function (hello-py, fibonacci, text-sentiment, notify, image-resize) ngoài hello-world |
 | 9 | Cấu hình HPA, cấu hình KEDA, kiểm thử scale thủ công cho cả hai | Người 3 | ⬜ Chưa bắt đầu (đã có function để test) |
-| 10 | Triển khai Prometheus + Grafana, tích hợp metrics từ OpenFaaS & K8s | Người 4 (Người 1 đã cài nền trước) | Đã bàn giao dashboard OpenFaaS 6 panel và kiểm tra import; còn metrics Kubernetes và kiểm thử dưới tải — [mốc 21/11](week-10-monitoring.md) |
+| 10 | Triển khai Prometheus + Grafana, tích hợp metrics từ OpenFaaS & K8s | Người 4 (Người 1 đã cài nền trước) | ✅ Dashboard Grafana v6 (4 panel bắt buộc + bổ sung), đã đối chiếu dưới tải với 6 run TN5; còn metrics tài nguyên/Kubernetes — [mốc 21/11](week-10-monitoring.md) |
 | 11 | Thử nghiệm các chiến lược tối ưu cold-start (warm-pool, image nhẹ, probe), đo latency | Người 2, 3 | ⬜ |
 | 12 | Chạy load test song song trên HPA và KEDA, thu thập số liệu so sánh | Người 3 | ⬜ |
 | 13 | Tổng hợp số liệu; vẽ biểu đồ so sánh cold-start và HPA vs KEDA | Người 3, 4 | ⬜ |
