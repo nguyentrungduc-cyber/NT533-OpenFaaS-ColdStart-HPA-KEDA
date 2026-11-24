@@ -10,6 +10,7 @@
 - Bảng/hình TN1–TN4 theo hồ sơ nguồn; bảng TN5 có request, failed, p50, p95 và dropped của sáu run, đối chiếu trực tiếp summary k6. Cập nhật mô tả cấu hình và nhận xét theo TN5 mới; không dùng các kết luận nguyên nhân chưa được xác minh. Không tính scale latency khi thiếu mốc tải.
 - Bản cuối kì (22/11/2026): bổ sung Bảng 9 và Hình 6 về diễn biến replica TN5 từ các file `.replicas.csv` (replica tối đa, thời gian từ lần tăng đầu tới desired tối đa, trễ Ready); mục 9.3 tổng hợp kết quả; hạn chế về scale-to-zero và mốc tải; mục 4 Chương IV phân công công việc (Bảng 10). Thống nhất đánh số đề mục và chú thích, đổi dòng ngày cập nhật ở bìa thành thời gian thực hiện.
 - Bản 23/11/2026: Hình 1 kiến trúc hệ thống; mục 3.1 Phát hiện về OpenFaaS CE; cài đặt bằng Helm thay arkade; Hình 8–9 chụp Grafana run1 HPA/KEDA; mục 2 Chương IV Khó khăn và cách khắc phục. Sửa nhận định về lỗi TN5: theo counter gateway, 64–91% response 502 xuất hiện sau khi replica đạt tối đa (minh chứng `monitoring/verification/2026-11-23.json`), nguyên nhân chưa kiểm chứng.
+- Bản 24/11/2026: bỏ hình kiến trúc Kubernetes tổng quát (không phải thiết kế của nhóm); thêm Hình 2 sơ đồ mạng cụm k3s (mục 2.2 Chương II); các hình sau giữ số 3–9 (Grafana là Hình 8–9). TN4 bỏ lượt 1 pod run1 do lỗi khi đo; Bảng 7 thêm cột Restart (1 pod run2 restart 2 lần, 2 và 3 pod không restart); vẽ lại Hình 5 với 3 lượt.
 - Mục lục và danh mục hình/bảng cập nhật bằng Word; bản PDF xuất từ Word có 28 trang, 10 bảng và 9 hình đánh số.
 
 ## Còn chờ chốt
